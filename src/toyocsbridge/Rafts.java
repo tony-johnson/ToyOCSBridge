@@ -22,11 +22,11 @@ public class Rafts {
     /**
      * Idle time before a clear is required
      */
-    static final Duration IDLE_BEFORE_CLEAR = Duration.ofMillis(4000);
+    static final Duration QUIESCENT_BEFORE_CLEAR = Duration.ofMillis(4000);
 
     public enum RaftsState {
 
-        CLEARING, READY, INTEGRATING, READING_OUT, NEEDS_CLEAR
+        CLEARING, QUIESCENT, INTEGRATING, READING_OUT, NEEDS_CLEAR
     }
 
     private final State raftsState;
@@ -42,8 +42,8 @@ public class Rafts {
 
             @Override
             public void stateChanged(State<RaftsState> currentState, RaftsState oldState) {
-                if (currentState.isInState(RaftsState.READY)) {
-                    clearFuture = ccs.schedule(IDLE_BEFORE_CLEAR, () -> {
+                if (currentState.isInState(RaftsState.QUIESCENT)) {
+                    clearFuture = ccs.schedule(QUIESCENT_BEFORE_CLEAR, () -> {
                         raftsState.setState(RaftsState.NEEDS_CLEAR);
                     });
                 } else {
@@ -57,21 +57,21 @@ public class Rafts {
     }
 
     void expose(Duration integrationTime) {
-        raftsState.checkState(RaftsState.READY);
+        raftsState.checkState(RaftsState.QUIESCENT);
         raftsState.setState(RaftsState.INTEGRATING);
         ccs.schedule(integrationTime, () -> {
             raftsState.setState(RaftsState.READING_OUT);
         });
         ccs.schedule(integrationTime.plus(READOUT_TIME), () -> {
-            raftsState.setState(RaftsState.READY);
+            raftsState.setState(RaftsState.QUIESCENT);
         });
     }
 
     void clear() {
-        raftsState.checkState(RaftsState.READY, RaftsState.NEEDS_CLEAR);
+        raftsState.checkState(RaftsState.QUIESCENT, RaftsState.NEEDS_CLEAR);
         raftsState.setState(RaftsState.CLEARING);
         ccs.schedule(CLEAR_TIME, () -> {
-            raftsState.setState(RaftsState.READY);
+            raftsState.setState(RaftsState.QUIESCENT);
         });
     }
 
