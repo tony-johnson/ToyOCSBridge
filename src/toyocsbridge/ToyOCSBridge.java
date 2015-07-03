@@ -51,7 +51,7 @@ public class ToyOCSBridge {
      */
     public static void main(String[] args) {
         ToyOCSBridge ocs = new ToyOCSBridge();
-        ToyOCSGUI gui = new ToyOCSGUI(ocs);
+        ToyOCSGUI gui = new ToyOCSGUI(ocs,ocs.ccs);
         gui.setVisible(true);
     }
 

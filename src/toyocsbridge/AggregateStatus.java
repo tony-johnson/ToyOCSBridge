@@ -1,5 +1,6 @@
 package toyocsbridge;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,10 @@ public class AggregateStatus {
             }
         }
         return true;
+    }
+    
+    Collection<State> getStates() {
+        return states.values();
     }
 
     @Override

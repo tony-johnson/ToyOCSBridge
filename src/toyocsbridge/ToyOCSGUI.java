@@ -1,22 +1,58 @@
 package toyocsbridge;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.Box;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import toyocsbridge.State.StateChangeListener;
 
 /**
  *
  * @author tonyj
  */
 public class ToyOCSGUI extends javax.swing.JFrame {
+
     private ToyOCSBridge ocs;
+    private final CCS ccs;
+    private Map<String, JComboBox> statusMap = new HashMap<>();
 
     /**
      * Creates new form ToyOCSGUI
+     *
      * @param ocs
      */
-    public ToyOCSGUI(ToyOCSBridge ocs) {
+    ToyOCSGUI(ToyOCSBridge ocs, CCS ccs) {
         this.ocs = ocs;
+        this.ccs = ccs;
         initComponents();
-        
+        AggregateStatus aggregateStatus = ccs.getAggregateStatus();
+        for (State state : aggregateStatus.getStates()) {
+            String name = state.getEnumClass().getSimpleName();
+            System.out.println(name);
+            Box box = Box.createHorizontalBox();
+            box.add(new JLabel(name));
+            JComboBox combo = new JComboBox(state.getEnumClass().getEnumConstants());
+            combo.setEditable(false);
+            combo.setSelectedItem(state.getState());
+            box.add(combo);
+            box.add(Box.createHorizontalGlue());
+            statusPanel.add(box);
+            statusMap.put(name, combo);
+        }
+        ccs.addStateChangeListener(new StateChangeListener() {
+
+            @Override
+            public void stateChanged(State state, Enum oldState) {
+                SwingUtilities.invokeLater(() -> {
+                    JComboBox combo = statusMap.get(state.getEnumClass().getSimpleName());
+                    combo.setSelectedItem(state.getState());
+                });
+
+            }
+        });
     }
 
     /**
@@ -28,8 +64,8 @@ public class ToyOCSGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
+        statusPanel = new javax.swing.JPanel();
+        javax.swing.JPanel jPanel2 = new javax.swing.JPanel();
         initImageButton = new javax.swing.JButton();
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
         deltaTSpinner = new javax.swing.JSpinner();
@@ -42,18 +78,8 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Status"));
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 68, Short.MAX_VALUE)
-        );
+        statusPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Status"));
+        statusPanel.setLayout(new javax.swing.BoxLayout(statusPanel, javax.swing.BoxLayout.PAGE_AXIS));
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Commands"));
 
@@ -119,7 +145,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                         .addComponent(exposureSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(openShutterCheckbox)))
-                .addGap(0, 98, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -145,7 +171,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -153,10 +179,10 @@ public class ToyOCSGUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(statusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(191, Short.MAX_VALUE))
+                .addContainerGap(259, Short.MAX_VALUE))
         );
 
         pack();
@@ -198,10 +224,9 @@ public class ToyOCSGUI extends javax.swing.JFrame {
     private javax.swing.JSpinner deltaTSpinner;
     private javax.swing.JSpinner exposureSpinner;
     private javax.swing.JButton initImageButton;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JSpinner nImagesSpinner;
     private javax.swing.JCheckBox openShutterCheckbox;
+    private javax.swing.JPanel statusPanel;
     private javax.swing.JButton takeImagesButton;
     // End of variables declaration//GEN-END:variables
 }
