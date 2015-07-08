@@ -36,6 +36,7 @@ public class Shutter {
 
     private final State shutterReadinessState;
     private final State shutterState;
+    private ScheduledFuture<?> notReadyFuture;
 
     private CCS ccs;
 
@@ -45,26 +46,36 @@ public class Shutter {
         shutterState = new State(ccs, ShutterState.CLOSED);
         // When the shutter is closed, we only keep the motors powered up for a limited time
         shutterState.addStateChangeListener(new StateChangeListener<ShutterState>() {
-            private ScheduledFuture<?> notReadyFuture;
-
             @Override
             public void stateChanged(State<ShutterState> state, ShutterState oldState) {
                 if (state.isInState(ShutterState.CLOSED)) {
-                    notReadyFuture = ccs.schedule(READY_TIME, () -> {
-                        shutterReadinessState.setState(ShutterReadinessState.NOT_READY);
-                    });
+                    scheduleNotReady();
                 } else {
-                    if (notReadyFuture != null) notReadyFuture.cancel(false);
+                    cancelNotReady();
                 }
             }
 
         });
     }
 
+    private void scheduleNotReady() {
+        notReadyFuture = ccs.schedule(READY_TIME, () -> {
+            shutterReadinessState.setState(Shutter.ShutterReadinessState.NOT_READY);
+        });
+    }
+
+    private void cancelNotReady() {
+        if (notReadyFuture != null) {
+            notReadyFuture.cancel(false);
+        }
+    }
+
     void prepare() {
+        cancelNotReady();
         shutterReadinessState.setState(ShutterReadinessState.GETTING_READY);
         ccs.schedule(PREP_TIME, () -> {
             shutterReadinessState.setState(ShutterReadinessState.READY);
+            scheduleNotReady();
         });
     }
 
