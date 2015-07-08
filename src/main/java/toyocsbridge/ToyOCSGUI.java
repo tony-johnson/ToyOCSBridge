@@ -16,7 +16,6 @@ import toyocsbridge.State.StateChangeListener;
 public class ToyOCSGUI extends javax.swing.JFrame {
 
     private ToyOCSBridge ocs;
-    private final CCS ccs;
     private Map<String, JComboBox> statusMap = new HashMap<>();
 
     /**
@@ -26,12 +25,10 @@ public class ToyOCSGUI extends javax.swing.JFrame {
      */
     ToyOCSGUI(ToyOCSBridge ocs, CCS ccs) {
         this.ocs = ocs;
-        this.ccs = ccs;
         initComponents();
         AggregateStatus aggregateStatus = ccs.getAggregateStatus();
         for (State state : aggregateStatus.getStates()) {
             String name = state.getEnumClass().getSimpleName();
-            System.out.println(name);
             Box box = Box.createHorizontalBox();
             box.add(new JLabel(name));
             JComboBox combo = new JComboBox(state.getEnumClass().getEnumConstants());
