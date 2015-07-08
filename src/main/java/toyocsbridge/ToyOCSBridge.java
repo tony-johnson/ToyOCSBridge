@@ -25,6 +25,7 @@ public class ToyOCSBridge {
     private final CCS ccs = new CCS();
     private final Shutter shutter = new Shutter(ccs);
     private final Rafts rafts = new Rafts(ccs);
+    private final Filter fcs = new Filter(ccs);
     private final OCSCommandExecutor ocs = new OCSCommandExecutor(ccs);
 
     private final State takeImageReadinessState = new State(ccs, TakeImageReadinessState.NOT_READY);
@@ -51,7 +52,7 @@ public class ToyOCSBridge {
      */
     public static void main(String[] args) {
         ToyOCSBridge ocs = new ToyOCSBridge();
-        ToyOCSGUI gui = new ToyOCSGUI(ocs,ocs.ccs);
+        ToyOCSGUI gui = new ToyOCSGUI(ocs, ocs.ccs);
         gui.setVisible(true);
     }
 
@@ -59,10 +60,19 @@ public class ToyOCSBridge {
         OCSCommand initImage = new InitImageCommand(deltaT);
         ocs.executeOCSCommand(initImage);
     }
-    
+
     void takeImages(double exposure, int nImages, boolean openShutter) {
         OCSCommand takeImages = new TakeImagesCommand(exposure, nImages, openShutter);
         ocs.executeOCSCommand(takeImages);
+    }
+
+    void setFilter(String filterName) {
+        OCSCommand setFilter = new SetFilterCommand(filterName);
+        ocs.executeOCSCommand(setFilter);
+    }
+
+    public Filter getFCS() {
+        return fcs;
     }
 
     private class InitImageCommand extends OCSCommand {
@@ -137,5 +147,27 @@ public class ToyOCSBridge {
                 }
             }
         }
+    }
+
+    private class SetFilterCommand extends OCSCommand {
+
+        private String filter;
+
+        public SetFilterCommand(String filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        void testPreconditions() throws PreconditionsNotMet {
+            if (!fcs.filterIsAvailable(filter)) {
+                throw new PreconditionsNotMet("Invalid filter: " + filter);
+            }
+        }
+
+        @Override
+        void execute() throws Exception {
+            fcs.setFilter(filter);
+        }
+
     }
 }
