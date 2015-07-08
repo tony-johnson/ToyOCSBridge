@@ -2,6 +2,10 @@ package toyocsbridge;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.StreamHandler;
 import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -50,6 +54,18 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             }
         });
+        Logger logger = Logger.getLogger("toyocsbridge");
+        TextAreaHandler handler = new TextAreaHandler();
+        handler.setFormatter(new Formatter(){
+
+            @Override
+            public String format(LogRecord record) {
+                
+                return String.format("[%tc] %s\n", record.getMillis(),formatMessage(record));
+            }
+            
+        });
+        logger.addHandler(handler);
     }
 
     /**
@@ -72,6 +88,8 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
         exposureSpinner = new javax.swing.JSpinner();
         openShutterCheckbox = new javax.swing.JCheckBox();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        logTextArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -112,11 +130,6 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         openShutterCheckbox.setSelected(true);
         openShutterCheckbox.setText("openShutter");
         openShutterCheckbox.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-        openShutterCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openShutterCheckboxActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -161,15 +174,20 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                     .addComponent(openShutterCheckbox)))
         );
 
+        logTextArea.setColumns(20);
+        logTextArea.setRows(5);
+        jScrollPane2.setViewportView(logTextArea);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane2)
+                    .addComponent(statusPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -179,7 +197,9 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                 .addComponent(statusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(259, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -213,14 +233,22 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         sw.execute();
     }//GEN-LAST:event_takeImagesButtonActionPerformed
 
-    private void openShutterCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openShutterCheckboxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_openShutterCheckboxActionPerformed
+    private class TextAreaHandler extends StreamHandler {
+
+        @Override
+        public void publish(LogRecord record) {
+            super.publish(record);
+            flush();
+            logTextArea.append(getFormatter().format(record));
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSpinner deltaTSpinner;
     private javax.swing.JSpinner exposureSpinner;
     private javax.swing.JButton initImageButton;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea logTextArea;
     private javax.swing.JSpinner nImagesSpinner;
     private javax.swing.JCheckBox openShutterCheckbox;
     private javax.swing.JPanel statusPanel;
