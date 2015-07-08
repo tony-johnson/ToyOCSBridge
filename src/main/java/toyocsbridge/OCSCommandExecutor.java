@@ -30,8 +30,9 @@ public class OCSCommandExecutor {
                 commandState.setState(CommandState.BUSY);
                 acknowledgeCommand(command);
                 command.execute();
+                reportComplete(command);
             } catch (PreconditionsNotMet ex) {
-                rejectCommand(command,ex.getMessage());
+                rejectCommand(command, ex.getMessage());
             } catch (Exception ex) {
                 reportError(command, ex);
             } finally {
@@ -49,7 +50,11 @@ public class OCSCommandExecutor {
     }
 
     private void reportError(OCSCommand command, Exception ex) {
-        logger.log(Level.WARNING, "Command failed: "+command.getClass().getSimpleName(), ex);
+        logger.log(Level.WARNING, "Command failed: " + command.getClass().getSimpleName(), ex);
+    }
+
+    private void reportComplete(OCSCommand command) {
+        logger.log(Level.INFO, "Command complete: {0}", command.getClass().getSimpleName());
     }
 
     /**
@@ -71,7 +76,9 @@ public class OCSCommandExecutor {
          */
         abstract void execute() throws Exception;
     }
+
     static class PreconditionsNotMet extends Exception {
+
         private static final long serialVersionUID = 1L;
 
         public PreconditionsNotMet(String reason) {
