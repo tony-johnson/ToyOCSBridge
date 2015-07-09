@@ -58,6 +58,7 @@ public class Filter {
                 Future<Void> waitForUnloaded = ccs.waitForStatus(FilterState.UNLOADED);
                 ccs.schedule(UNLOAD_TIME, () -> {
                     filterState.setState(FilterState.UNLOADED);
+                    currentFilter = null;
                 });
                 waitForUnloaded.get(UNLOAD_TIME.toMillis() * 2, TimeUnit.MILLISECONDS);
             }
@@ -76,6 +77,7 @@ public class Filter {
             Future<Void> waitForUnloaded = ccs.waitForStatus(FilterState.LOADED);
             ccs.schedule(LOAD_TIME, () -> {
                 filterState.setState(FilterState.LOADED);
+                currentFilter = filter;
             });
             waitForUnloaded.get(LOAD_TIME.toMillis() * 2, TimeUnit.MILLISECONDS);
         }
