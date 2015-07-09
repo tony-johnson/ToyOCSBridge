@@ -26,7 +26,7 @@ public class ToyOCSBridge {
     private final Shutter shutter = new Shutter(ccs);
     private final Rafts rafts = new Rafts(ccs);
     private final Filter fcs = new Filter(ccs);
-    private final OCSCommandExecutor ocs = new OCSCommandExecutor(ccs);
+    private OCSCommandExecutor ocs = new OCSCommandExecutor(ccs);
 
     private final State takeImageReadinessState = new State(ccs, TakeImageReadinessState.NOT_READY);
 
@@ -47,27 +47,41 @@ public class ToyOCSBridge {
         });
     }
 
+    void setExecutor(OCSCommandExecutor ocs) {
+        this.ocs = ocs;
+    }
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         ToyOCSBridge ocs = new ToyOCSBridge();
+        OCSInterface ocsInterface = new OCSInterface(ocs, ocs.ccs);
+        Thread t = new Thread("OCSCommandReceiver") {
+
+            @Override
+            public void run() {
+                ocsInterface.run();
+            }
+
+        };
+        t.start();
         ToyOCSGUI gui = new ToyOCSGUI(ocs, ocs.ccs);
         gui.setVisible(true);
     }
 
-    void initImage(float deltaT) {
-        OCSCommand initImage = new InitImageCommand(deltaT);
+    void initImage(int cmdId, double deltaT) {
+        OCSCommand initImage = new InitImageCommand(cmdId, deltaT);
         ocs.executeOCSCommand(initImage);
     }
 
-    void takeImages(double exposure, int nImages, boolean openShutter) {
-        OCSCommand takeImages = new TakeImagesCommand(exposure, nImages, openShutter);
+    void takeImages(int cmdId, double exposure, int nImages, boolean openShutter) {
+        OCSCommand takeImages = new TakeImagesCommand(cmdId, exposure, nImages, openShutter);
         ocs.executeOCSCommand(takeImages);
     }
 
-    void setFilter(String filterName) {
-        OCSCommand setFilter = new SetFilterCommand(filterName);
+    void setFilter(int cmdId, String filterName) {
+        OCSCommand setFilter = new SetFilterCommand(cmdId, filterName);
         ocs.executeOCSCommand(setFilter);
     }
 
@@ -75,11 +89,12 @@ public class ToyOCSBridge {
         return fcs;
     }
 
-    private class InitImageCommand extends OCSCommand {
+    class InitImageCommand extends OCSCommand {
 
         private double deltaT;
 
-        public InitImageCommand(double deltaT) {
+        public InitImageCommand(int cmdId, double deltaT) {
+            super(cmdId);
             this.deltaT = deltaT;
         }
 
@@ -103,13 +118,14 @@ public class ToyOCSBridge {
         }
     }
 
-    private class TakeImagesCommand extends OCSCommand {
+    class TakeImagesCommand extends OCSCommand {
 
         private double exposure;
         private int nImages;
         private boolean openShutter;
 
-        public TakeImagesCommand(double exposure, int nImages, boolean openShutter) {
+        public TakeImagesCommand(int cmdId, double exposure, int nImages, boolean openShutter) {
+            super(cmdId);
             this.exposure = exposure;
             this.nImages = nImages;
             this.openShutter = openShutter;
@@ -149,11 +165,12 @@ public class ToyOCSBridge {
         }
     }
 
-    private class SetFilterCommand extends OCSCommand {
+    class SetFilterCommand extends OCSCommand {
 
         private String filter;
 
-        public SetFilterCommand(String filter) {
+        public SetFilterCommand(int cmdId, String filter) {
+            super(cmdId);
             this.filter = filter;
         }
 

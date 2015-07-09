@@ -231,7 +231,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.initImage(deltaT);
+                ocs.initImage(0, deltaT);
                 return null;
             }
         };
@@ -246,7 +246,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.takeImages(exposure, nImages, openShutter);
+                ocs.takeImages(0, exposure, nImages, openShutter);
                 return null;
             }
         };
@@ -259,7 +259,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.setFilter(filter);
+                ocs.setFilter(0, filter);
                 return null;
             }
         };

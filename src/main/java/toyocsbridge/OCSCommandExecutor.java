@@ -41,19 +41,19 @@ public class OCSCommandExecutor {
         }
     }
 
-    private void rejectCommand(OCSCommand command, String reason) {
+    protected void rejectCommand(OCSCommand command, String reason) {
         logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command.getClass().getSimpleName(), reason});
     }
 
-    private void acknowledgeCommand(OCSCommand command) {
+    protected void acknowledgeCommand(OCSCommand command) {
         logger.log(Level.INFO, "Acknowledge command: {0}", command.getClass().getSimpleName());
     }
 
-    private void reportError(OCSCommand command, Exception ex) {
+    protected void reportError(OCSCommand command, Exception ex) {
         logger.log(Level.WARNING, "Command failed: " + command.getClass().getSimpleName(), ex);
     }
 
-    private void reportComplete(OCSCommand command) {
+    protected void reportComplete(OCSCommand command) {
         logger.log(Level.INFO, "Command complete: {0}", command.getClass().getSimpleName());
     }
 
@@ -63,7 +63,11 @@ public class OCSCommandExecutor {
      * @author tonyj
      */
     public static abstract class OCSCommand {
+        private final int cmdId;
 
+        OCSCommand(int cmdId) {
+            this.cmdId = cmdId;
+        }
         /**
          * Must return true for the command to be accepted.
          *
@@ -75,6 +79,10 @@ public class OCSCommandExecutor {
          * Actually perform the command
          */
         abstract void execute() throws Exception;
+
+        public int getCmdId() {
+            return cmdId;
+        }
     }
 
     static class PreconditionsNotMet extends Exception {
