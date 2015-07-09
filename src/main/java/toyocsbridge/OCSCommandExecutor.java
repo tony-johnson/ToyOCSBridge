@@ -29,7 +29,7 @@ public class OCSCommandExecutor {
             try {
                 Duration timeout = command.testPreconditions();
                 commandState.setState(CommandState.BUSY);
-                acknowledgeCommand(command, timeout);
+                if (!timeout.isZero()) acknowledgeCommand(command, timeout);
                 command.execute();
                 reportComplete(command);
             } catch (PreconditionsNotMet ex) {
