@@ -98,10 +98,11 @@ public class ToyOCSBridge {
         }
 
         @Override
-        void testPreconditions() throws PreconditionsNotMet {
+        Duration testPreconditions() throws PreconditionsNotMet {
             if (deltaT <= 0 || deltaT > 15) {
                 throw new PreconditionsNotMet("Invalid deltaT: " + deltaT);
             }
+            return Duration.ZERO;
         }
 
         @Override
@@ -131,10 +132,12 @@ public class ToyOCSBridge {
         }
 
         @Override
-        void testPreconditions() throws PreconditionsNotMet {
+        Duration testPreconditions() throws PreconditionsNotMet {
             if (nImages <= 0 || nImages > 10 || exposure < 1 || exposure > 30) {
                 throw new PreconditionsNotMet("Invalid argument");
             }
+            // Worse case estimate
+            return Duration.ofMillis((long) (exposure * 1000)).plus(Shutter.MOVE_TIME).plus(Rafts.READOUT_TIME).multipliedBy(nImages);
         }
 
         @Override
@@ -174,10 +177,12 @@ public class ToyOCSBridge {
         }
 
         @Override
-        void testPreconditions() throws PreconditionsNotMet {
+        Duration testPreconditions() throws PreconditionsNotMet {
             if (!fcs.filterIsAvailable(filter)) {
                 throw new PreconditionsNotMet("Invalid filter: " + filter);
             }
+            // Worse case
+            return Filter.ROTATION_TIME_PER_DEGREE.multipliedBy(360).plus(Filter.LOAD_TIME).plus(Filter.UNLOAD_TIME);
         }
 
         @Override

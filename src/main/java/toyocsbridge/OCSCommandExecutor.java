@@ -1,5 +1,6 @@
 package toyocsbridge;
 
+import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,9 +27,9 @@ public class OCSCommandExecutor {
             rejectCommand(command, "Command state not idle");
         } else {
             try {
-                command.testPreconditions();
+                Duration timeout = command.testPreconditions();
                 commandState.setState(CommandState.BUSY);
-                acknowledgeCommand(command);
+                acknowledgeCommand(command, timeout);
                 command.execute();
                 reportComplete(command);
             } catch (PreconditionsNotMet ex) {
@@ -45,7 +46,7 @@ public class OCSCommandExecutor {
         logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command.getClass().getSimpleName(), reason});
     }
 
-    protected void acknowledgeCommand(OCSCommand command) {
+    protected void acknowledgeCommand(OCSCommand command, Duration timeout) {
         logger.log(Level.INFO, "Acknowledge command: {0}", command.getClass().getSimpleName());
     }
 
@@ -69,11 +70,11 @@ public class OCSCommandExecutor {
             this.cmdId = cmdId;
         }
         /**
-         * Must return true for the command to be accepted.
-         *
-         * @return
+         * Check preconditions, and estimate the command duration.
+         * @throws PreconditionsNotMet If the preconditions are not met
+         * @return The estimated duration of the command (can be ZERO)
          */
-        abstract void testPreconditions() throws PreconditionsNotMet;
+        abstract Duration testPreconditions() throws PreconditionsNotMet;
 
         /**
          * Actually perform the command

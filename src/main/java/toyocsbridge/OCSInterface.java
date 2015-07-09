@@ -1,5 +1,6 @@
 package toyocsbridge;
 
+import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lsst.sal.SAL_camera;
@@ -114,10 +115,10 @@ public class OCSInterface {
         }
 
         @Override
-        protected void acknowledgeCommand(OCSCommand command) {
-            super.acknowledgeCommand(command);
+        protected void acknowledgeCommand(OCSCommand command, Duration timeout) {
+            super.acknowledgeCommand(command, timeout);
             if (command.getCmdId() != 0) {
-                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_INPROGRESS, 0, "Ack : OK");
+                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_INPROGRESS, (int) timeout.getSeconds(), "Ack : OK");
             }
         }
 
