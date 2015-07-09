@@ -28,8 +28,9 @@ public class ToyOCSGUI extends javax.swing.JFrame {
      *
      * @param ocs
      */
-    ToyOCSGUI(ToyOCSBridge ocs, CCS ccs) {
+    ToyOCSGUI(ToyOCSBridge ocs) {
         this.ocs = ocs;
+        CCS ccs = ocs.getCCS();
         initComponents();
         AggregateStatus aggregateStatus = ccs.getAggregateStatus();
         for (State state : aggregateStatus.getStates()) {

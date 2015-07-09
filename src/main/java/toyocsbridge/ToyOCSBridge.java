@@ -46,7 +46,12 @@ public class ToyOCSBridge {
             }
         });
     }
-
+    /** 
+     * Allow a user to provide an alternative implementation of the OCSCommandExecutor.
+     * Used to override the default OCSCommandExecutor with one that actually sends
+     * acknowledgments back to OCS.
+     * @param ocs 
+     */
     void setExecutor(OCSCommandExecutor ocs) {
         this.ocs = ocs;
     }
@@ -56,17 +61,7 @@ public class ToyOCSBridge {
      */
     public static void main(String[] args) {
         ToyOCSBridge ocs = new ToyOCSBridge();
-        OCSInterface ocsInterface = new OCSInterface(ocs, ocs.ccs);
-        Thread t = new Thread("OCSCommandReceiver") {
-
-            @Override
-            public void run() {
-                ocsInterface.run();
-            }
-
-        };
-        t.start();
-        ToyOCSGUI gui = new ToyOCSGUI(ocs, ocs.ccs);
+        ToyOCSGUI gui = new ToyOCSGUI(ocs);
         gui.setVisible(true);
     }
 
@@ -87,6 +82,10 @@ public class ToyOCSBridge {
 
     public Filter getFCS() {
         return fcs;
+    }
+
+    CCS getCCS() {
+        return ccs;
     }
 
     class InitImageCommand extends OCSCommand {

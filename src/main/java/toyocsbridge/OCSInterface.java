@@ -18,21 +18,39 @@ public class OCSInterface {
     private final ToyOCSBridge bridge;
     private static final Logger logger = Logger.getLogger(OCSInterface.class.getName());
 
-    OCSInterface(ToyOCSBridge ocs, CCS ccs) {
-        this.bridge = ocs;
+    OCSInterface(ToyOCSBridge bridge) {
+        this.bridge = bridge;
         mgr = new SAL_camera();
-        ExtendedOCSCommandExecutor exec = new ExtendedOCSCommandExecutor(ccs);
+        ExtendedOCSCommandExecutor exec = new ExtendedOCSCommandExecutor(bridge.getCCS());
         bridge.setExecutor(exec);
-        ccs.addStateChangeListener(new StateChangeListener() {
+        bridge.getCCS().addStateChangeListener(new StateChangeListener() {
 
             @Override
             public void stateChanged(State currentState, Enum oldState) {
                 // For now send a generic event
-                String msg = String.format("State Changed %s: %s->%s",currentState.getClass().getSimpleName(), oldState, currentState);
+                String msg = String.format("State Changed %s: %s->%s", currentState.getClass().getSimpleName(), oldState, currentState);
                 int priority = 1;
                 mgr.logEvent(msg, priority);
             }
         });
+    }
+
+    public static void main(String[] args) {
+        ToyOCSBridge bridge = new ToyOCSBridge();
+        OCSInterface ocsInterface = new OCSInterface(bridge);
+        ToyOCSGUI gui = new ToyOCSGUI(bridge);
+        gui.setVisible(true);
+
+        Thread t = new Thread("OCSCommandReceiver") {
+
+            @Override
+            public void run() {
+                ocsInterface.run();
+            }
+
+        };
+        t.start();
+
     }
 
     void run() {
@@ -59,7 +77,6 @@ public class OCSInterface {
                 bridge.initImage(cmdId, initImageCommand.deltaT);
             }
             try {
-                System.out.println("Waiting for commands");
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 logger.log(Level.SEVERE, "Unexpected interruption", ex);
@@ -82,25 +99,34 @@ public class OCSInterface {
         @Override
         protected void reportComplete(OCSCommand command) {
             super.reportComplete(command);
-            mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_COMPLETE, 0, "Done : OK");
+            if (command.getCmdId() != 0) {
+                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_COMPLETE, 0, "Done : OK");
+            }
 
         }
 
         @Override
         protected void reportError(OCSCommand command, Exception ex) {
             super.reportError(command, ex);
-            mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_FAILED, 0, "Error : " + ex.getMessage());
+            if (command.getCmdId() != 0) {
+                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_FAILED, 0, "Error : " + ex.getMessage());
+            }
         }
 
         @Override
         protected void acknowledgeCommand(OCSCommand command) {
             super.acknowledgeCommand(command);
-            mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_INPROGRESS, 0, "Ack : OK");
+            if (command.getCmdId() != 0) {
+                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_INPROGRESS, 0, "Ack : OK");
+            }
         }
 
         @Override
         protected void rejectCommand(OCSCommand command, String reason) {
-            mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_NOACK, 0, "Ack : NO");
+            super.rejectCommand(command, reason);
+            if (command.getCmdId() != 0) {
+                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_NOACK, 0, "Ack : NO");
+            }
         }
     }
 }
