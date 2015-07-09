@@ -116,6 +116,11 @@ public class ToyOCSBridge {
                 shutter.prepare();
             });
         }
+
+        @Override
+        public String toString() {
+            return "InitImageCommand{" + "deltaT=" + deltaT + '}';
+        }
     }
 
     class TakeImagesCommand extends OCSCommand {
@@ -165,6 +170,11 @@ public class ToyOCSBridge {
                 }
             }
         }
+
+        @Override
+        public String toString() {
+            return "TakeImagesCommand{" + "exposure=" + exposure + ", nImages=" + nImages + ", openShutter=" + openShutter + '}';
+        }
     }
 
     class SetFilterCommand extends OCSCommand {
@@ -190,5 +200,11 @@ public class ToyOCSBridge {
             fcs.setFilter(filter);
         }
 
+        @Override
+        public String toString() {
+            return "SetFilterCommand{" + "filter=" + filter + '}';
+        }
+        
     }
+
 }

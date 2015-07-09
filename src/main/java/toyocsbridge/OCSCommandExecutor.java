@@ -43,19 +43,19 @@ public class OCSCommandExecutor {
     }
 
     protected void rejectCommand(OCSCommand command, String reason) {
-        logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command.getClass().getSimpleName(), reason});
+        logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command, reason});
     }
 
     protected void acknowledgeCommand(OCSCommand command, Duration timeout) {
-        logger.log(Level.INFO, "Acknowledge command: {0}", command.getClass().getSimpleName());
+        logger.log(Level.INFO, "Acknowledge command: {0}", command);
     }
 
     protected void reportError(OCSCommand command, Exception ex) {
-        logger.log(Level.WARNING, "Command failed: " + command.getClass().getSimpleName(), ex);
+        logger.log(Level.WARNING, "Command failed: " + command, ex);
     }
 
     protected void reportComplete(OCSCommand command) {
-        logger.log(Level.INFO, "Command complete: {0}", command.getClass().getSimpleName());
+        logger.log(Level.INFO, "Command complete: {0}", command);
     }
 
     /**
