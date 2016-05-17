@@ -15,7 +15,7 @@
         <dependency>
             <groupId>org.lsst.lsst-tsvm</groupId>
             <artifactId>sal_camera</artifactId>
-            <version>2.4</version>
+            <version>3.0</version>
         </dependency>
     </dependencies>
     
