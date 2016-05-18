@@ -22,11 +22,16 @@ public class ToyOCSBridge {
         READY, NOT_READY, GETTING_READY
     };
 
+    public enum LSE209State {
+        OFFLINE_PUBLISH_ONLY, OFFLINE_AVAILABLE, STANDBY, DISABLED, ENABLED, FAULT
+    };
+
     private final CCS ccs = new CCS();
     private final Shutter shutter = new Shutter(ccs);
     private final Rafts rafts = new Rafts(ccs);
     private final Filter fcs = new Filter(ccs);
     private OCSCommandExecutor ocs = new OCSCommandExecutor(ccs);
+    private final State lse209State = new State(ccs, LSE209State.OFFLINE_PUBLISH_ONLY);
 
     private final State takeImageReadinessState = new State(ccs, TakeImageReadinessState.NOT_READY);
 
@@ -46,11 +51,13 @@ public class ToyOCSBridge {
             }
         });
     }
-    /** 
-     * Allow a user to provide an alternative implementation of the OCSCommandExecutor.
-     * Used to override the default OCSCommandExecutor with one that actually sends
-     * acknowledgments back to OCS.
-     * @param ocs 
+
+    /**
+     * Allow a user to provide an alternative implementation of the
+     * OCSCommandExecutor. Used to override the default OCSCommandExecutor with
+     * one that actually sends acknowledgments back to OCS.
+     *
+     * @param ocs
      */
     void setExecutor(OCSCommandExecutor ocs) {
         this.ocs = ocs;
@@ -90,7 +97,7 @@ public class ToyOCSBridge {
 
     class InitImageCommand extends OCSCommand {
 
-        private double deltaT;
+        private final double deltaT;
 
         public InitImageCommand(int cmdId, double deltaT) {
             super(cmdId);
@@ -99,6 +106,9 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
+            }
             if (deltaT <= 0 || deltaT > 15) {
                 throw new PreconditionsNotMet("Invalid deltaT: " + deltaT);
             }
@@ -125,9 +135,9 @@ public class ToyOCSBridge {
 
     class TakeImagesCommand extends OCSCommand {
 
-        private double exposure;
-        private int nImages;
-        private boolean openShutter;
+        private final double exposure;
+        private final int nImages;
+        private final boolean openShutter;
 
         public TakeImagesCommand(int cmdId, double exposure, int nImages, boolean openShutter) {
             super(cmdId);
@@ -138,6 +148,9 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
+            }
             if (nImages <= 0 || nImages > 10 || exposure < 1 || exposure > 30) {
                 throw new PreconditionsNotMet("Invalid argument");
             }
@@ -179,7 +192,7 @@ public class ToyOCSBridge {
 
     class SetFilterCommand extends OCSCommand {
 
-        private String filter;
+        private final String filter;
 
         public SetFilterCommand(int cmdId, String filter) {
             super(cmdId);
@@ -188,6 +201,9 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
+            }
             if (!fcs.filterIsAvailable(filter)) {
                 throw new PreconditionsNotMet("Invalid filter: " + filter);
             }
@@ -204,7 +220,135 @@ public class ToyOCSBridge {
         public String toString() {
             return "SetFilterCommand{" + "filter=" + filter + '}';
         }
-        
+
     }
 
+    // TODO: This should be "EnterControl" according to LSE-209
+    class TakeControlCommand extends OCSCommand {
+
+        public TakeControlCommand(int cmdId) {
+            super(cmdId);
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (lse209State.isInState(LSE209State.OFFLINE_AVAILABLE)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+            return Duration.ZERO;
+        }
+
+        @Override
+        void execute() throws Exception {
+            lse209State.setState(LSE209State.STANDBY);
+        }
+    }
+
+    class ExitCommand extends OCSCommand {
+
+        public ExitCommand(int cmdId) {
+            super(cmdId);
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (lse209State.isInState(LSE209State.STANDBY)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+            return Duration.ZERO;
+        }
+
+        @Override
+        void execute() throws Exception {
+            lse209State.setState(LSE209State.OFFLINE_PUBLISH_ONLY);
+        }
+    }
+
+    class StartCommand extends OCSCommand {
+
+        private final String configuration;
+
+        public StartCommand(int cmdId, String configuration) {
+            super(cmdId);
+            this.configuration = configuration;
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (lse209State.isInState(LSE209State.STANDBY)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+            return Duration.ZERO;
+        }
+
+        @Override
+        void execute() throws Exception {
+            //TODO: Set the configuration
+            lse209State.setState(LSE209State.DISABLED);
+        }
+    }
+
+    class StandbyCommand extends OCSCommand {
+
+        public StandbyCommand(int cmdId) {
+            super(cmdId);
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (lse209State.isInState(LSE209State.DISABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+            return Duration.ZERO;
+        }
+
+        @Override
+        void execute() throws Exception {
+            //TODO: should we reject the standy command if things are happening?
+            //TODO: or wait until things finish and return then?
+            lse209State.setState(LSE209State.STANDBY);
+        }
+    }
+
+    class EnabledCommand extends OCSCommand {
+
+        public EnabledCommand(int cmdId) {
+            super(cmdId);
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (lse209State.isInState(LSE209State.DISABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+            return Duration.ZERO;
+        }
+
+        @Override
+        void execute() throws Exception {
+            lse209State.setState(LSE209State.ENABLED);
+        }
+    }
+
+    class DisableCommand extends OCSCommand {
+
+        public DisableCommand(int cmdId) {
+            super(cmdId);
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (lse209State.isInState(LSE209State.DISABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+            return Duration.ZERO;
+        }
+
+        @Override
+        void execute() throws Exception {
+            //TODO: should we reject the standy command if things are happening?
+            //TODO: or wait until things finish and return then?
+            lse209State.setState(LSE209State.DISABLED);
+        }
+    }
 }
