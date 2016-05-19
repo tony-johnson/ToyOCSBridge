@@ -123,6 +123,11 @@ public class ToyOCSGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         statusPanel = new javax.swing.JPanel();
+        commandPanel2 = new javax.swing.JPanel();
+        setAvailableButton = new javax.swing.JButton();
+        revokeAvailableButton = new javax.swing.JButton();
+        simulateFault = new javax.swing.JButton();
+        clearFaultButton = new javax.swing.JButton();
         javax.swing.JPanel commandPanel = new javax.swing.JPanel();
         enterControlButton = new javax.swing.JButton();
         exitButton = new javax.swing.JButton();
@@ -151,44 +156,99 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         statusPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Status"));
         statusPanel.setLayout(new javax.swing.BoxLayout(statusPanel, javax.swing.BoxLayout.PAGE_AXIS));
 
+        commandPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("CCS Commands"));
+
+        setAvailableButton.setText("setAvailable");
+        setAvailableButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setAvailableButtonActionPerformed(evt);
+            }
+        });
+
+        revokeAvailableButton.setText("revokeAvailable");
+        revokeAvailableButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                revokeAvailableButtonActionPerformed(evt);
+            }
+        });
+
+        simulateFault.setText("simulateFault");
+        simulateFault.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                simulateFaultActionPerformed(evt);
+            }
+        });
+
+        clearFaultButton.setText("clearFault");
+        clearFaultButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearFaultButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout commandPanel2Layout = new javax.swing.GroupLayout(commandPanel2);
+        commandPanel2.setLayout(commandPanel2Layout);
+        commandPanel2Layout.setHorizontalGroup(
+            commandPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(commandPanel2Layout.createSequentialGroup()
+                .addGroup(commandPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(setAvailableButton)
+                    .addComponent(revokeAvailableButton)
+                    .addComponent(simulateFault)
+                    .addComponent(clearFaultButton))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        commandPanel2Layout.setVerticalGroup(
+            commandPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(commandPanel2Layout.createSequentialGroup()
+                .addComponent(setAvailableButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(revokeAvailableButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addComponent(simulateFault)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(clearFaultButton)
+                .addContainerGap())
+        );
+
         commandPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("OCS Lifecycle Commands"));
 
-        enterControlButton.setText("EnterControl");
+        enterControlButton.setText("enterControl");
         enterControlButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 enterControlButtonActionPerformed(evt);
             }
         });
 
-        exitButton.setText("Exit");
+        exitButton.setText("exit");
         exitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitButtonActionPerformed(evt);
             }
         });
 
-        startButton.setText("Start");
+        startButton.setText("start");
         startButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 startButtonActionPerformed(evt);
             }
         });
 
-        standbyButton.setText("Standby");
+        standbyButton.setText("standby");
         standbyButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 standbyButtonActionPerformed(evt);
             }
         });
 
-        enableButton.setText("Enable");
+        enableButton.setText("enable");
         enableButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 enableButtonActionPerformed(evt);
             }
         });
 
-        disableButton.setText("Disable");
+        disableButton.setText("disable");
         disableButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 disableButtonActionPerformed(evt);
@@ -213,7 +273,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                     .addComponent(standbyButton)
                     .addComponent(enableButton)
                     .addComponent(disableButton))
-                .addGap(0, 271, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         commandPanelLayout.setVerticalGroup(
             commandPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -309,7 +369,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                         .addComponent(filterButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(filterComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 141, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         commandPanel1Layout.setVerticalGroup(
             commandPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -339,10 +399,11 @@ public class ToyOCSGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 995, Short.MAX_VALUE)
+                    .addComponent(commandPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(commandPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(commandPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(commandPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -351,11 +412,14 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(statusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(commandPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(commandPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(commandPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 292, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -474,6 +538,54 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         sw.execute();
     }//GEN-LAST:event_disableButtonActionPerformed
 
+    private void setAvailableButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setAvailableButtonActionPerformed
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.setAvailable();
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_setAvailableButtonActionPerformed
+
+    private void revokeAvailableButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_revokeAvailableButtonActionPerformed
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.revokeAvailable();
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_revokeAvailableButtonActionPerformed
+
+    private void simulateFaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_simulateFaultActionPerformed
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.simulateFault();
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_simulateFaultActionPerformed
+
+    private void clearFaultButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearFaultButtonActionPerformed
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.clearFault();
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_clearFaultButtonActionPerformed
+ 
     private class TextAreaHandler extends StreamHandler {
 
         @Override
@@ -485,6 +597,8 @@ public class ToyOCSGUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton clearFaultButton;
+    private javax.swing.JPanel commandPanel2;
     private javax.swing.JSpinner deltaTSpinner;
     private javax.swing.JButton disableButton;
     private javax.swing.JButton enableButton;
@@ -498,6 +612,9 @@ public class ToyOCSGUI extends javax.swing.JFrame {
     private javax.swing.JTextArea logTextArea;
     private javax.swing.JSpinner nImagesSpinner;
     private javax.swing.JCheckBox openShutterCheckbox;
+    private javax.swing.JButton revokeAvailableButton;
+    private javax.swing.JButton setAvailableButton;
+    private javax.swing.JButton simulateFault;
     private javax.swing.JButton standbyButton;
     private javax.swing.JButton startButton;
     private javax.swing.JTextField startTextField;

@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import toyocsbridge.OCSCommandExecutor.CCSCommand;
 import toyocsbridge.OCSCommandExecutor.OCSCommand;
 import toyocsbridge.OCSCommandExecutor.PreconditionsNotMet;
 import toyocsbridge.State.StateChangeListener;
@@ -26,14 +27,14 @@ public class ToyOCSBridge {
         OFFLINE_PUBLISH_ONLY, OFFLINE_AVAILABLE, STANDBY, DISABLED, ENABLED, FAULT
     };
 
+    // Note: order of declaration determines order of status boxes in GUI.
     private final CCS ccs = new CCS();
+    private final State lse209State = new State(ccs, LSE209State.OFFLINE_PUBLISH_ONLY);
+    private OCSCommandExecutor ocs = new OCSCommandExecutor(ccs);
+    private final State takeImageReadinessState = new State(ccs, TakeImageReadinessState.NOT_READY);
     private final Shutter shutter = new Shutter(ccs);
     private final Rafts rafts = new Rafts(ccs);
     private final Filter fcs = new Filter(ccs);
-    private OCSCommandExecutor ocs = new OCSCommandExecutor(ccs);
-    private final State lse209State = new State(ccs, LSE209State.OFFLINE_PUBLISH_ONLY);
-
-    private final State takeImageReadinessState = new State(ccs, TakeImageReadinessState.NOT_READY);
 
     public ToyOCSBridge() {
         // We are ready to take an image only if the rafts have been cleared, and the shutter
@@ -74,49 +75,69 @@ public class ToyOCSBridge {
 
     void initImage(int cmdId, double deltaT) {
         OCSCommand initImage = new InitImageCommand(cmdId, deltaT);
-        ocs.executeOCSCommand(initImage);
+        ocs.executeCommand(initImage);
     }
 
     void takeImages(int cmdId, double exposure, int nImages, boolean openShutter) {
         OCSCommand takeImages = new TakeImagesCommand(cmdId, exposure, nImages, openShutter);
-        ocs.executeOCSCommand(takeImages);
+        ocs.executeCommand(takeImages);
     }
 
     void setFilter(int cmdId, String filterName) {
         OCSCommand setFilter = new SetFilterCommand(cmdId, filterName);
-        ocs.executeOCSCommand(setFilter);
+        ocs.executeCommand(setFilter);
     }
-    
+
     void enterControl(int cmdId) {
         OCSCommand takeControl = new EnterControlCommand(cmdId);
-        ocs.executeOCSCommand(takeControl); 
+        ocs.executeCommand(takeControl);
     }
 
     void exit(int cmdId) {
         OCSCommand exit = new ExitCommand(cmdId);
-        ocs.executeOCSCommand(exit); 
+        ocs.executeCommand(exit);
     }
 
     void start(int cmdId, String configuration) {
         OCSCommand start = new StartCommand(cmdId, configuration);
-        ocs.executeOCSCommand(start); 
+        ocs.executeCommand(start);
     }
 
     void standby(int cmdId) {
         OCSCommand standby = new StandbyCommand(cmdId);
-        ocs.executeOCSCommand(standby); 
+        ocs.executeCommand(standby);
     }
 
     void enable(int cmdId) {
-        OCSCommand enable = new StandbyCommand(cmdId);
-        ocs.executeOCSCommand(enable); 
+        OCSCommand enable = new EnableCommand(cmdId);
+        ocs.executeCommand(enable);
     }
 
     void disable(int cmdId) {
         OCSCommand disable = new DisableCommand(cmdId);
-        ocs.executeOCSCommand(disable); 
+        ocs.executeCommand(disable);
     }
 
+    void setAvailable() {
+        CCSCommand setAvailable = new SetAvailableCommand();
+        ocs.executeCommand(setAvailable);
+    }
+
+    void revokeAvailable() {
+        CCSCommand revokeAvailable = new RevokeAvailableCommand();
+        ocs.executeCommand(revokeAvailable);
+    }
+
+    void simulateFault() {
+        CCSCommand simulateFault = new SimulateFaultCommand();
+        ocs.executeCommand(simulateFault);
+    }
+
+    void clearFault() {
+        CCSCommand clearFault = new ClearFaultCommand();
+        ocs.executeCommand(clearFault);
+    }
+    
     public Filter getFCS() {
         return fcs;
     }
@@ -359,9 +380,9 @@ public class ToyOCSBridge {
         }
     }
 
-    class EnabledCommand extends OCSCommand {
+    class EnableCommand extends OCSCommand {
 
-        public EnabledCommand(int cmdId) {
+        public EnableCommand(int cmdId) {
             super(cmdId);
         }
 
@@ -409,6 +430,68 @@ public class ToyOCSBridge {
         public String toString() {
             return "DisableCommand";
         }
-        
+    }
+
+    class SetAvailableCommand extends CCSCommand {
+
+        @Override
+        void testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.OFFLINE_PUBLISH_ONLY)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+        }
+
+        @Override
+        void execute() throws Exception {
+            lse209State.setState(LSE209State.OFFLINE_AVAILABLE);
+        }
+
+    }
+
+    class RevokeAvailableCommand extends CCSCommand {
+
+        @Override
+        void testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.OFFLINE_AVAILABLE)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+        }
+
+        @Override
+        void execute() throws Exception {
+            lse209State.setState(LSE209State.OFFLINE_PUBLISH_ONLY);
+        }
+
+    }
+
+    class SimulateFaultCommand extends CCSCommand {
+
+        @Override
+        void testPreconditions() throws PreconditionsNotMet {
+
+        }
+
+        @Override
+        void execute() throws Exception {
+            //TODO: Should we also attempt to stop the subsystems?
+            lse209State.setState(LSE209State.FAULT);
+        }
+
+    }
+    
+    class ClearFaultCommand extends CCSCommand {
+
+        @Override
+        void testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.FAULT)) {
+                throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+        }
+
+        @Override
+        void execute() throws Exception {
+            lse209State.setState(LSE209State.OFFLINE_PUBLISH_ONLY);
+        }
+
     }
 }

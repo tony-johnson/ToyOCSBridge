@@ -22,14 +22,16 @@ public class OCSCommandExecutor {
         commandState = new State(ccs, CommandState.IDLE);
     }
 
-    void executeOCSCommand(OCSCommand command) {
+    void executeCommand(OCSCommand command) {
         if (!commandState.isInState(CommandState.IDLE)) {
             rejectCommand(command, "Command state not idle");
         } else {
             try {
                 Duration timeout = command.testPreconditions();
                 commandState.setState(CommandState.BUSY);
-                if (!timeout.isZero()) acknowledgeCommand(command, timeout);
+                if (!timeout.isZero()) {
+                    acknowledgeCommand(command, timeout);
+                }
                 command.execute();
                 reportComplete(command);
             } catch (PreconditionsNotMet ex) {
@@ -39,6 +41,18 @@ public class OCSCommandExecutor {
             } finally {
                 commandState.setState(CommandState.IDLE);
             }
+        }
+    }
+
+    void executeCommand(CCSCommand command) {
+        // CCS commands do not report their execution to the OCS
+        try {
+            command.testPreconditions();
+            command.execute();
+        } catch (PreconditionsNotMet ex) {
+            logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command, ex.getMessage()});
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Command failed: " + command, ex);
         }
     }
 
@@ -64,13 +78,16 @@ public class OCSCommandExecutor {
      * @author tonyj
      */
     public static abstract class OCSCommand {
+
         private final int cmdId;
 
         OCSCommand(int cmdId) {
             this.cmdId = cmdId;
         }
+
         /**
          * Check preconditions, and estimate the command duration.
+         *
          * @throws PreconditionsNotMet If the preconditions are not met
          * @return The estimated duration of the command (can be ZERO)
          */
@@ -84,6 +101,29 @@ public class OCSCommandExecutor {
         public int getCmdId() {
             return cmdId;
         }
+    }
+
+    /**
+     * A base class for all CCS commands
+     *
+     * @author tonyj
+     */
+    public static abstract class CCSCommand {
+
+        CCSCommand() {
+        }
+
+        /**
+         * Check preconditions, and estimate the command duration.
+         *
+         * @throws PreconditionsNotMet If the preconditions are not met
+         */
+        abstract void testPreconditions() throws PreconditionsNotMet;
+
+        /**
+         * Actually perform the command
+         */
+        abstract void execute() throws Exception;
     }
 
     static class PreconditionsNotMet extends Exception {

@@ -1,7 +1,7 @@
 package toyocsbridge;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class AggregateStatus {
  
-    private final Map<Class<? extends Enum>,State> states = new HashMap<>();
+    private final Map<Class<? extends Enum>,State> states = new LinkedHashMap<>();
        
     void add(State<?> state) {
         states.put(state.getEnumClass(), state);

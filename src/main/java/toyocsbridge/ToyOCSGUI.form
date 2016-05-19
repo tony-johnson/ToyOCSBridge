@@ -23,13 +23,14 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane2" pref="0" max="32767" attributes="0"/>
                   <Component id="statusPanel" alignment="0" max="32767" attributes="0"/>
-                  <Component id="commandPanel" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jScrollPane2" alignment="0" pref="995" max="32767" attributes="0"/>
                   <Component id="commandPanel1" alignment="0" max="32767" attributes="0"/>
+                  <Component id="commandPanel" max="32767" attributes="0"/>
+                  <Component id="commandPanel2" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -41,11 +42,14 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="statusPanel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
+              <Component id="commandPanel2" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Component id="commandPanel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="commandPanel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane2" pref="292" max="32767" attributes="0"/>
+              <Component id="jScrollPane2" pref="206" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -63,6 +67,79 @@
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout">
         <Property name="axis" type="int" value="3"/>
       </Layout>
+    </Container>
+    <Container class="javax.swing.JPanel" name="commandPanel2">
+      <Properties>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+            <TitledBorder title="CCS Commands"/>
+          </Border>
+        </Property>
+      </Properties>
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" attributes="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="setAvailableButton" min="-2" max="-2" attributes="0"/>
+                      <Component id="revokeAvailableButton" min="-2" max="-2" attributes="0"/>
+                      <Component id="simulateFault" min="-2" max="-2" attributes="0"/>
+                      <Component id="clearFaultButton" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <Component id="setAvailableButton" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="revokeAvailableButton" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="7" max="32767" attributes="0"/>
+                  <Component id="simulateFault" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="clearFaultButton" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JButton" name="setAvailableButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="setAvailable"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setAvailableButtonActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="revokeAvailableButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="revokeAvailable"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="revokeAvailableButtonActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="simulateFault">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="simulateFault"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="simulateFaultActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="clearFaultButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="clearFault"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clearFaultButtonActionPerformed"/>
+          </Events>
+        </Component>
+      </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="commandPanel">
       <Properties>
@@ -93,7 +170,7 @@
                       <Component id="enableButton" min="-2" max="-2" attributes="0"/>
                       <Component id="disableButton" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="0" pref="271" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -121,7 +198,7 @@
       <SubComponents>
         <Component class="javax.swing.JButton" name="enterControlButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="EnterControl"/>
+            <Property name="text" type="java.lang.String" value="enterControl"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="enterControlButtonActionPerformed"/>
@@ -129,7 +206,7 @@
         </Component>
         <Component class="javax.swing.JButton" name="exitButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Exit"/>
+            <Property name="text" type="java.lang.String" value="exit"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exitButtonActionPerformed"/>
@@ -137,7 +214,7 @@
         </Component>
         <Component class="javax.swing.JButton" name="startButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Start"/>
+            <Property name="text" type="java.lang.String" value="start"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="startButtonActionPerformed"/>
@@ -145,7 +222,7 @@
         </Component>
         <Component class="javax.swing.JButton" name="standbyButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Standby"/>
+            <Property name="text" type="java.lang.String" value="standby"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="standbyButtonActionPerformed"/>
@@ -153,7 +230,7 @@
         </Component>
         <Component class="javax.swing.JButton" name="enableButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Enable"/>
+            <Property name="text" type="java.lang.String" value="enable"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="enableButtonActionPerformed"/>
@@ -161,7 +238,7 @@
         </Component>
         <Component class="javax.swing.JButton" name="disableButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Disable"/>
+            <Property name="text" type="java.lang.String" value="disable"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="disableButtonActionPerformed"/>
@@ -234,7 +311,7 @@
                           <Component id="filterComboBox" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <EmptySpace min="0" pref="141" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
