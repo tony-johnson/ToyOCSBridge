@@ -15,9 +15,9 @@ import java.util.logging.Logger;
 public class State<T extends Enum> {
 
     private T currentState;
-    private Class<T> enumClass;
-    private CCS ccs;
-    private List<StateChangeListener<T>> listeners = new CopyOnWriteArrayList<>();
+    private final Class<T> enumClass;
+    private final CCS ccs;
+    private final List<StateChangeListener<T>> listeners = new CopyOnWriteArrayList<>();
     private static final Logger logger = Logger.getLogger(State.class.getName());
 
     /**

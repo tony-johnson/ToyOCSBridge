@@ -86,6 +86,36 @@ public class ToyOCSBridge {
         OCSCommand setFilter = new SetFilterCommand(cmdId, filterName);
         ocs.executeOCSCommand(setFilter);
     }
+    
+    void enterControl(int cmdId) {
+        OCSCommand takeControl = new EnterControlCommand(cmdId);
+        ocs.executeOCSCommand(takeControl); 
+    }
+
+    void exit(int cmdId) {
+        OCSCommand exit = new ExitCommand(cmdId);
+        ocs.executeOCSCommand(exit); 
+    }
+
+    void start(int cmdId, String configuration) {
+        OCSCommand start = new StartCommand(cmdId, configuration);
+        ocs.executeOCSCommand(start); 
+    }
+
+    void standby(int cmdId) {
+        OCSCommand standby = new StandbyCommand(cmdId);
+        ocs.executeOCSCommand(standby); 
+    }
+
+    void enable(int cmdId) {
+        OCSCommand enable = new StandbyCommand(cmdId);
+        ocs.executeOCSCommand(enable); 
+    }
+
+    void disable(int cmdId) {
+        OCSCommand disable = new DisableCommand(cmdId);
+        ocs.executeOCSCommand(disable); 
+    }
 
     public Filter getFCS() {
         return fcs;
@@ -223,16 +253,15 @@ public class ToyOCSBridge {
 
     }
 
-    // TODO: This should be "EnterControl" according to LSE-209
-    class TakeControlCommand extends OCSCommand {
+    class EnterControlCommand extends OCSCommand {
 
-        public TakeControlCommand(int cmdId) {
+        public EnterControlCommand(int cmdId) {
             super(cmdId);
         }
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
-            if (lse209State.isInState(LSE209State.OFFLINE_AVAILABLE)) {
+            if (!lse209State.isInState(LSE209State.OFFLINE_AVAILABLE)) {
                 throw new PreconditionsNotMet("Command not accepted in " + lse209State);
             }
             return Duration.ZERO;
@@ -241,6 +270,11 @@ public class ToyOCSBridge {
         @Override
         void execute() throws Exception {
             lse209State.setState(LSE209State.STANDBY);
+        }
+
+        @Override
+        public String toString() {
+            return "EnterControlCommand";
         }
     }
 
@@ -252,7 +286,7 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
-            if (lse209State.isInState(LSE209State.STANDBY)) {
+            if (!lse209State.isInState(LSE209State.STANDBY)) {
                 throw new PreconditionsNotMet("Command not accepted in " + lse209State);
             }
             return Duration.ZERO;
@@ -261,6 +295,11 @@ public class ToyOCSBridge {
         @Override
         void execute() throws Exception {
             lse209State.setState(LSE209State.OFFLINE_PUBLISH_ONLY);
+        }
+
+        @Override
+        public String toString() {
+            return "ExitCommand";
         }
     }
 
@@ -275,7 +314,7 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
-            if (lse209State.isInState(LSE209State.STANDBY)) {
+            if (!lse209State.isInState(LSE209State.STANDBY)) {
                 throw new PreconditionsNotMet("Command not accepted in " + lse209State);
             }
             return Duration.ZERO;
@@ -285,6 +324,11 @@ public class ToyOCSBridge {
         void execute() throws Exception {
             //TODO: Set the configuration
             lse209State.setState(LSE209State.DISABLED);
+        }
+
+        @Override
+        public String toString() {
+            return "StartCommand{" + "configuration=" + configuration + '}';
         }
     }
 
@@ -296,7 +340,7 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
-            if (lse209State.isInState(LSE209State.DISABLED)) {
+            if (!lse209State.isInState(LSE209State.DISABLED)) {
                 throw new PreconditionsNotMet("Command not accepted in " + lse209State);
             }
             return Duration.ZERO;
@@ -308,6 +352,11 @@ public class ToyOCSBridge {
             //TODO: or wait until things finish and return then?
             lse209State.setState(LSE209State.STANDBY);
         }
+
+        @Override
+        public String toString() {
+            return "StandbyCommand";
+        }
     }
 
     class EnabledCommand extends OCSCommand {
@@ -318,7 +367,7 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
-            if (lse209State.isInState(LSE209State.DISABLED)) {
+            if (!lse209State.isInState(LSE209State.DISABLED)) {
                 throw new PreconditionsNotMet("Command not accepted in " + lse209State);
             }
             return Duration.ZERO;
@@ -327,6 +376,11 @@ public class ToyOCSBridge {
         @Override
         void execute() throws Exception {
             lse209State.setState(LSE209State.ENABLED);
+        }
+
+        @Override
+        public String toString() {
+            return "EnabledCommand";
         }
     }
 
@@ -338,7 +392,7 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
-            if (lse209State.isInState(LSE209State.DISABLED)) {
+            if (!lse209State.isInState(LSE209State.DISABLED)) {
                 throw new PreconditionsNotMet("Command not accepted in " + lse209State);
             }
             return Duration.ZERO;
@@ -350,5 +404,11 @@ public class ToyOCSBridge {
             //TODO: or wait until things finish and return then?
             lse209State.setState(LSE209State.DISABLED);
         }
+
+        @Override
+        public String toString() {
+            return "DisableCommand";
+        }
+        
     }
 }

@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lsst.sal.SAL_camera;
+import org.lsst.sal.salActor;
 import toyocsbridge.State.StateChangeListener;
 
 /**
@@ -63,7 +64,9 @@ public class OCSInterface {
         camera.command_takeImages takeImagesCommand = new camera.command_takeImages();
         mgr.salProcessor("camera_command_initImage");
         camera.command_initImage initImageCommand = new camera.command_initImage();
-
+        mgr.salProcessor("camera_command_initImage");
+        camera.command_initImage initImageCommand = new camera.command();
+        
         while (!shutdown) {
             int cmdId = mgr.acceptCommand_setFilter(setFilterCommand);
             if (cmdId > 0) {

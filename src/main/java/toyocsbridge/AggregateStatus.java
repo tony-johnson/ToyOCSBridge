@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class AggregateStatus {
  
-    private Map<Class<? extends Enum>,State> states = new HashMap<>();
+    private final Map<Class<? extends Enum>,State> states = new HashMap<>();
        
     void add(State<?> state) {
         states.put(state.getEnumClass(), state);
