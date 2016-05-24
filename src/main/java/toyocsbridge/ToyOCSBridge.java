@@ -413,7 +413,7 @@ public class ToyOCSBridge {
 
         @Override
         Duration testPreconditions() throws PreconditionsNotMet {
-            if (!lse209State.isInState(LSE209State.DISABLED)) {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
                 throw new PreconditionsNotMet("Command not accepted in " + lse209State);
             }
             return Duration.ZERO;

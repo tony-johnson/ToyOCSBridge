@@ -63,7 +63,18 @@ public class OCSInterface {
         camera.command_takeImages takeImagesCommand = new camera.command_takeImages();
         mgr.salProcessor("camera_command_initImage");
         camera.command_initImage initImageCommand = new camera.command_initImage();
-        mgr.salProcessor("camera_command_initImage");
+        mgr.salProcessor("camera_command_enable");
+        camera.command_enable enableCommand = new camera.command_enable();
+        mgr.salProcessor("camera_command_disable");
+        camera.command_disable disableCommand = new camera.command_disable();
+        mgr.salProcessor("camera_command_enterControl");
+        camera.command_enterControl enterControlCommand = new camera.command_enterControl();
+        mgr.salProcessor("camera_command_exit");
+        camera.command_exit exitCommand = new camera.command_exit();
+        mgr.salProcessor("camera_command_start");
+        camera.command_start startCommand = new camera.command_start();       
+        mgr.salProcessor("camera_command_standby");
+        camera.command_standby standbyCommand = new camera.command_standby();         
         
         while (!shutdown) {
             int cmdId = mgr.acceptCommand_setFilter(setFilterCommand);
@@ -78,8 +89,32 @@ public class OCSInterface {
             if (cmdId > 0) {
                 bridge.initImage(cmdId, initImageCommand.deltaT);
             }
+            cmdId = mgr.acceptCommand_enable(enableCommand);
+            if (cmdId > 0) {
+                bridge.enable(cmdId);
+            }
+            cmdId = mgr.acceptCommand_disable(disableCommand);
+            if (cmdId > 0) {
+                bridge.disable(cmdId);
+            }
+            cmdId = mgr.acceptCommand_enterControl(enterControlCommand);
+            if (cmdId > 0) {
+                bridge.enterControl(cmdId);
+            }
+            cmdId = mgr.acceptCommand_exit(exitCommand);
+            if (cmdId > 0) {
+                bridge.exit(cmdId);
+            }
+            cmdId = mgr.acceptCommand_start(startCommand);
+            if (cmdId > 0) {
+                bridge.start(cmdId,startCommand.configuration);
+            }
+            cmdId = mgr.acceptCommand_standby(standbyCommand);
+            if (cmdId > 0) {
+                bridge.standby(cmdId);
+            }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 logger.log(Level.SEVERE, "Unexpected interruption", ex);
             }
