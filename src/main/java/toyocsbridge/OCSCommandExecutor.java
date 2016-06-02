@@ -1,5 +1,6 @@
 package toyocsbridge;
 
+import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,14 +22,16 @@ public class OCSCommandExecutor {
         commandState = new State(ccs, CommandState.IDLE);
     }
 
-    void executeOCSCommand(OCSCommand command) {
+    void executeCommand(OCSCommand command) {
         if (!commandState.isInState(CommandState.IDLE)) {
             rejectCommand(command, "Command state not idle");
         } else {
             try {
-                command.testPreconditions();
+                Duration timeout = command.testPreconditions();
                 commandState.setState(CommandState.BUSY);
-                acknowledgeCommand(command);
+                if (!timeout.isZero()) {
+                    acknowledgeCommand(command, timeout);
+                }
                 command.execute();
                 reportComplete(command);
             } catch (PreconditionsNotMet ex) {
@@ -41,20 +44,32 @@ public class OCSCommandExecutor {
         }
     }
 
-    private void rejectCommand(OCSCommand command, String reason) {
-        logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command.getClass().getSimpleName(), reason});
+    void executeCommand(CCSCommand command) {
+        // CCS commands do not report their execution to the OCS
+        try {
+            command.testPreconditions();
+            command.execute();
+        } catch (PreconditionsNotMet ex) {
+            logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command, ex.getMessage()});
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Command failed: " + command, ex);
+        }
     }
 
-    private void acknowledgeCommand(OCSCommand command) {
-        logger.log(Level.INFO, "Acknowledge command: {0}", command.getClass().getSimpleName());
+    protected void rejectCommand(OCSCommand command, String reason) {
+        logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command, reason});
     }
 
-    private void reportError(OCSCommand command, Exception ex) {
-        logger.log(Level.WARNING, "Command failed: " + command.getClass().getSimpleName(), ex);
+    protected void acknowledgeCommand(OCSCommand command, Duration timeout) {
+        logger.log(Level.INFO, "Acknowledge command: {0}", command);
     }
 
-    private void reportComplete(OCSCommand command) {
-        logger.log(Level.INFO, "Command complete: {0}", command.getClass().getSimpleName());
+    protected void reportError(OCSCommand command, Exception ex) {
+        logger.log(Level.WARNING, "Command failed: " + command, ex);
+    }
+
+    protected void reportComplete(OCSCommand command) {
+        logger.log(Level.INFO, "Command complete: {0}", command);
     }
 
     /**
@@ -64,10 +79,44 @@ public class OCSCommandExecutor {
      */
     public static abstract class OCSCommand {
 
+        private final int cmdId;
+
+        OCSCommand(int cmdId) {
+            this.cmdId = cmdId;
+        }
+
         /**
-         * Must return true for the command to be accepted.
+         * Check preconditions, and estimate the command duration.
          *
-         * @return
+         * @throws PreconditionsNotMet If the preconditions are not met
+         * @return The estimated duration of the command (can be ZERO)
+         */
+        abstract Duration testPreconditions() throws PreconditionsNotMet;
+
+        /**
+         * Actually perform the command
+         */
+        abstract void execute() throws Exception;
+
+        public int getCmdId() {
+            return cmdId;
+        }
+    }
+
+    /**
+     * A base class for all CCS commands
+     *
+     * @author tonyj
+     */
+    public static abstract class CCSCommand {
+
+        CCSCommand() {
+        }
+
+        /**
+         * Check preconditions, and estimate the command duration.
+         *
+         * @throws PreconditionsNotMet If the preconditions are not met
          */
         abstract void testPreconditions() throws PreconditionsNotMet;
 

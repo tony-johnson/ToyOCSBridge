@@ -10,4 +10,20 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.lsst.lsst-tsvm</groupId>
+            <artifactId>sal_camera</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+    </dependencies>
+    
+    <repositories>
+        <repository>
+            <id>ocs-maven2-public</id>
+            <name>OCS Maven 2 central repository</name>
+            <url>http://dev.lsstcorp.org:8081/nexus/content/groups/ocs-maven2-public/</url>
+        </repository>
+    </repositories>
 </project>

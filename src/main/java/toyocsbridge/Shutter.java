@@ -38,7 +38,7 @@ public class Shutter {
     private final State shutterState;
     private ScheduledFuture<?> notReadyFuture;
 
-    private CCS ccs;
+    private final CCS ccs;
 
     Shutter(CCS ccs) {
         this.ccs = ccs;
