@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lsst.sal.SAL_camera;
-import toyocsbridge.State.StateChangeListener;
 
 /**
  * Interface to the real OCS.
@@ -24,15 +23,11 @@ public class OCSInterface {
         mgr = new SAL_camera();
         ExtendedOCSCommandExecutor exec = new ExtendedOCSCommandExecutor(bridge.getCCS());
         bridge.setExecutor(exec);
-        bridge.getCCS().addStateChangeListener(new StateChangeListener() {
-
-            @Override
-            public void stateChanged(State currentState, Enum oldState) {
-                // For now send a generic event
-                String msg = String.format("State Changed %s: %s->%s", currentState.getClass().getSimpleName(), oldState, currentState);
-                int priority = 1;
-                mgr.logEvent(msg, priority);
-            }
+        bridge.getCCS().addStateChangeListener((currentState, oldState) -> {
+            // For now send a generic event
+            String msg = String.format("State Changed %s: %s->%s", currentState.getClass().getSimpleName(), oldState, currentState);
+            int priority = 1;
+            mgr.logEvent(msg, priority);
         });
     }
 
