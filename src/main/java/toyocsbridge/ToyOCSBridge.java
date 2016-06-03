@@ -78,14 +78,34 @@ public class ToyOCSBridge {
         ocs.executeCommand(initImage);
     }
 
-    void takeImages(int cmdId, double exposure, int nImages, boolean openShutter) {
-        OCSCommand takeImages = new TakeImagesCommand(cmdId, exposure, nImages, openShutter);
-        ocs.executeCommand(takeImages);
-    }
-
     void setFilter(int cmdId, String filterName) {
         OCSCommand setFilter = new SetFilterCommand(cmdId, filterName);
         ocs.executeCommand(setFilter);
+    }
+
+    void takeImages(int cmdId, double exposure, int nImages, boolean openShutter, boolean science, boolean wavefront, boolean guider, String visitName) {
+        OCSCommand takeImages = new TakeImagesCommand(cmdId, exposure, nImages, openShutter, science, wavefront, guider, visitName);
+        ocs.executeCommand(takeImages);
+    }
+
+    void initGuiders(int cmdId, String roiSpec) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    void clear(int cmdId, int nClears) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    void startImage(int cmdId, String visitName, boolean openShutter, boolean science, boolean wavefront, boolean guider, double timeout) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    void endImage(int cmdId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    void discardRows(int cmdId, int nRows) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     void enterControl(int cmdId) {
@@ -137,7 +157,7 @@ public class ToyOCSBridge {
         CCSCommand clearFault = new ClearFaultCommand();
         ocs.executeCommand(clearFault);
     }
-    
+
     public Filter getFCS() {
         return fcs;
     }
@@ -189,12 +209,20 @@ public class ToyOCSBridge {
         private final double exposure;
         private final int nImages;
         private final boolean openShutter;
+        private final boolean science;
+        private final boolean wavefront;
+        private final boolean guider;
+        private final String visitName;
 
-        public TakeImagesCommand(int cmdId, double exposure, int nImages, boolean openShutter) {
+        public TakeImagesCommand(int cmdId, double exposure, int nImages, boolean openShutter, boolean science, boolean wavefront, boolean guider, String visitName) {
             super(cmdId);
             this.exposure = exposure;
             this.nImages = nImages;
             this.openShutter = openShutter;
+            this.science = science;
+            this.wavefront = wavefront;
+            this.guider = guider;
+            this.visitName = visitName;
         }
 
         @Override
@@ -237,8 +265,9 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "TakeImagesCommand{" + "exposure=" + exposure + ", nImages=" + nImages + ", openShutter=" + openShutter + '}';
+            return "TakeImagesCommand{" + "exposure=" + exposure + ", nImages=" + nImages + ", openShutter=" + openShutter + ", science=" + science + ", wavefront=" + wavefront + ", guider=" + guider + ", visitName=" + visitName + '}';
         }
+
     }
 
     class SetFilterCommand extends OCSCommand {
@@ -478,7 +507,7 @@ public class ToyOCSBridge {
         }
 
     }
-    
+
     class ClearFaultCommand extends CCSCommand {
 
         @Override

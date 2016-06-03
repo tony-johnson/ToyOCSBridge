@@ -17,7 +17,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import toyocsbridge.State.StateChangeListener;
 
 /**
  *
@@ -52,16 +51,11 @@ public class ToyOCSGUI extends javax.swing.JFrame {
             statusPanel.add(box);
             statusMap.put(name, combo);
         }
-        ccs.addStateChangeListener(new StateChangeListener() {
-
-            @Override
-            public void stateChanged(State state, Enum oldState) {
-                SwingUtilities.invokeLater(() -> {
-                    JComboBox combo = statusMap.get(state.getEnumClass().getSimpleName());
-                    combo.setSelectedItem(state.getState());
-                });
-
-            }
+        ccs.addStateChangeListener((newState, oldState) -> {
+            SwingUtilities.invokeLater(() -> {
+                JComboBox combo = statusMap.get(newState.getEnumClass().getSimpleName());
+                combo.setSelectedItem(newState.getState());
+            });
         });
         filterComboBox.setModel(new DefaultComboBoxModel(ocs.getFCS().getAvailableFilters().toArray()));
         Logger logger = Logger.getLogger("toyocsbridge");
@@ -136,20 +130,42 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         enableButton = new javax.swing.JButton();
         disableButton = new javax.swing.JButton();
         startTextField = new javax.swing.JTextField();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        logTextArea = new javax.swing.JTextArea();
-        javax.swing.JPanel commandPanel1 = new javax.swing.JPanel();
+        commandPanel1 = new javax.swing.JPanel();
         initImageButton = new javax.swing.JButton();
-        javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
         deltaTSpinner = new javax.swing.JSpinner();
         takeImagesButton = new javax.swing.JButton();
-        javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
         nImagesSpinner = new javax.swing.JSpinner();
-        javax.swing.JLabel jLabel6 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
         exposureSpinner = new javax.swing.JSpinner();
-        openShutterCheckbox = new javax.swing.JCheckBox();
-        filterButton = new javax.swing.JButton();
+        openShutterCheckBox = new javax.swing.JCheckBox();
+        setFilterButton = new javax.swing.JButton();
         filterComboBox = new javax.swing.JComboBox();
+        scienceCheckBox = new javax.swing.JCheckBox();
+        wavefrontCheckBox1 = new javax.swing.JCheckBox();
+        guiderCheckBox = new javax.swing.JCheckBox();
+        visitNameTextField = new javax.swing.JTextField();
+        initGuidersButton = new javax.swing.JButton();
+        roiSpecTextField = new javax.swing.JTextField();
+        clearButton = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        nClearSpinner = new javax.swing.JSpinner();
+        startImageButton = new javax.swing.JButton();
+        endImageButton = new javax.swing.JButton();
+        discardRowsButton = new javax.swing.JButton();
+        openShutterCheckBox1 = new javax.swing.JCheckBox();
+        scienceCheckBox1 = new javax.swing.JCheckBox();
+        wavefrontCheckBox = new javax.swing.JCheckBox();
+        guiderCheckBox1 = new javax.swing.JCheckBox();
+        visitNameTextField1 = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        discardRowsSpinner = new javax.swing.JSpinner();
+        timeoutSpinner = new javax.swing.JSpinner();
+        jLabel7 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        logTextArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -257,6 +273,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
         startTextField.setColumns(20);
         startTextField.setText("Normal");
+        startTextField.setToolTipText("Configuration name");
 
         javax.swing.GroupLayout commandPanelLayout = new javax.swing.GroupLayout(commandPanel);
         commandPanel.setLayout(commandPanelLayout);
@@ -290,12 +307,9 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(enableButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(disableButton))
+                .addComponent(disableButton)
+                .addContainerGap(29, Short.MAX_VALUE))
         );
-
-        logTextArea.setColumns(80);
-        logTextArea.setRows(20);
-        jScrollPane2.setViewportView(logTextArea);
 
         commandPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("OCS Camera Commands"));
 
@@ -328,18 +342,106 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
         exposureSpinner.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(15.0f), Float.valueOf(0.0f), Float.valueOf(30.0f), Float.valueOf(1.0f)));
 
-        openShutterCheckbox.setSelected(true);
-        openShutterCheckbox.setText("openShutter");
-        openShutterCheckbox.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        openShutterCheckBox.setSelected(true);
+        openShutterCheckBox.setText("openShutter");
+        openShutterCheckBox.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
 
-        filterButton.setText("setFilter");
-        filterButton.addActionListener(new java.awt.event.ActionListener() {
+        setFilterButton.setText("setFilter");
+        setFilterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                filterButtonActionPerformed(evt);
+                setFilterButtonActionPerformed(evt);
             }
         });
 
         filterComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        scienceCheckBox.setSelected(true);
+        scienceCheckBox.setText("science");
+        scienceCheckBox.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
+        wavefrontCheckBox1.setSelected(true);
+        wavefrontCheckBox1.setText("wavefront");
+        wavefrontCheckBox1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
+        guiderCheckBox.setSelected(true);
+        guiderCheckBox.setText("guider");
+        guiderCheckBox.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
+        visitNameTextField.setColumns(20);
+        visitNameTextField.setText("visit-00001");
+        visitNameTextField.setToolTipText("Visit name");
+
+        initGuidersButton.setText("initGuiders");
+        initGuidersButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                initGuidersButtonActionPerformed(evt);
+            }
+        });
+
+        roiSpecTextField.setColumns(20);
+        roiSpecTextField.setToolTipText("ROI Specification");
+
+        clearButton.setText("clear");
+        clearButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("roiSpec");
+
+        jLabel2.setText("n");
+
+        nClearSpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, 1000, 1));
+
+        startImageButton.setText("startImage");
+        startImageButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                startImageButtonActionPerformed(evt);
+            }
+        });
+
+        endImageButton.setText("endImage");
+        endImageButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                endImageButtonActionPerformed(evt);
+            }
+        });
+
+        discardRowsButton.setText("discardRows");
+        discardRowsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                discardRowsButtonActionPerformed(evt);
+            }
+        });
+
+        openShutterCheckBox1.setSelected(true);
+        openShutterCheckBox1.setText("openShutter");
+        openShutterCheckBox1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
+        scienceCheckBox1.setSelected(true);
+        scienceCheckBox1.setText("science");
+        scienceCheckBox1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
+        wavefrontCheckBox.setSelected(true);
+        wavefrontCheckBox.setText("wavefront");
+        wavefrontCheckBox.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
+        guiderCheckBox1.setSelected(true);
+        guiderCheckBox1.setText("guider");
+        guiderCheckBox1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
+        visitNameTextField1.setColumns(20);
+        visitNameTextField1.setText("visit-00001");
+        visitNameTextField1.setToolTipText("Visit name");
+
+        jLabel3.setText("rows");
+
+        discardRowsSpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, 1000, 1));
+
+        timeoutSpinner.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(15.0f), Float.valueOf(0.0f), Float.valueOf(30.0f), Float.valueOf(1.0f)));
+
+        jLabel7.setText("timeout");
 
         javax.swing.GroupLayout commandPanel1Layout = new javax.swing.GroupLayout(commandPanel1);
         commandPanel1.setLayout(commandPanel1Layout);
@@ -364,11 +466,54 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exposureSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(openShutterCheckbox))
-                    .addGroup(commandPanel1Layout.createSequentialGroup()
-                        .addComponent(filterButton)
+                        .addComponent(openShutterCheckBox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(filterComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(scienceCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(wavefrontCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(guiderCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(visitNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(commandPanel1Layout.createSequentialGroup()
+                        .addComponent(setFilterButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(filterComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(commandPanel1Layout.createSequentialGroup()
+                        .addComponent(initGuidersButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(roiSpecTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(commandPanel1Layout.createSequentialGroup()
+                        .addComponent(clearButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nClearSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(commandPanel1Layout.createSequentialGroup()
+                        .addComponent(startImageButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(openShutterCheckBox1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(scienceCheckBox1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(wavefrontCheckBox1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(guiderCheckBox1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(visitNameTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(timeoutSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(endImageButton)
+                    .addGroup(commandPanel1Layout.createSequentialGroup()
+                        .addComponent(discardRowsButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(discardRowsSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         commandPanel1Layout.setVerticalGroup(
@@ -385,12 +530,48 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                     .addComponent(nImagesSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6)
                     .addComponent(exposureSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(openShutterCheckbox))
+                    .addComponent(openShutterCheckBox)
+                    .addComponent(scienceCheckBox)
+                    .addComponent(guiderCheckBox)
+                    .addComponent(visitNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(wavefrontCheckBox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(commandPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(filterButton)
-                    .addComponent(filterComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(setFilterButton)
+                    .addComponent(filterComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(commandPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(initGuidersButton)
+                    .addComponent(roiSpecTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(commandPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(clearButton)
+                    .addComponent(jLabel2)
+                    .addComponent(nClearSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(commandPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(startImageButton)
+                    .addComponent(openShutterCheckBox1)
+                    .addComponent(scienceCheckBox1)
+                    .addComponent(wavefrontCheckBox1)
+                    .addComponent(guiderCheckBox1)
+                    .addComponent(visitNameTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(timeoutSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(endImageButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(commandPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(discardRowsButton)
+                    .addComponent(jLabel3)
+                    .addComponent(discardRowsSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        logTextArea.setColumns(80);
+        logTextArea.setRows(20);
+        jScrollPane2.setViewportView(logTextArea);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -400,10 +581,10 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 995, Short.MAX_VALUE)
-                    .addComponent(commandPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(commandPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(commandPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(commandPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(commandPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -414,11 +595,11 @@ public class ToyOCSGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(commandPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(commandPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(commandPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(commandPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 410, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -462,46 +643,6 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         sw.execute();
 
     }//GEN-LAST:event_startButtonActionPerformed
-
-    private void initImageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initImageButtonActionPerformed
-        float deltaT = ((Number) deltaTSpinner.getModel().getValue()).floatValue();
-        SwingWorker sw = new SwingWorker() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                ocs.initImage(0, deltaT);
-                return null;
-            }
-        };
-        sw.execute();
-    }//GEN-LAST:event_initImageButtonActionPerformed
-
-    private void takeImagesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_takeImagesButtonActionPerformed
-        int nImages = ((Number) nImagesSpinner.getModel().getValue()).intValue();
-        float exposure = ((Number) exposureSpinner.getModel().getValue()).floatValue();
-        boolean openShutter = openShutterCheckbox.isSelected();
-        SwingWorker sw = new SwingWorker() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                ocs.takeImages(0, exposure, nImages, openShutter);
-                return null;
-            }
-        };
-        sw.execute();    }//GEN-LAST:event_takeImagesButtonActionPerformed
-
-    private void filterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filterButtonActionPerformed
-        String filter = filterComboBox.getSelectedItem().toString();
-        SwingWorker sw = new SwingWorker() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                ocs.setFilter(0, filter);
-                return null;
-            }
-        };
-        sw.execute();
-    }//GEN-LAST:event_filterButtonActionPerformed
 
     private void standbyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_standbyButtonActionPerformed
         SwingWorker sw = new SwingWorker() {
@@ -585,7 +726,120 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         };
         sw.execute();
     }//GEN-LAST:event_clearFaultButtonActionPerformed
- 
+
+    private void initGuidersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initGuidersButtonActionPerformed
+        String roiSpec = roiSpecTextField.getText();
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.initGuiders(0, roiSpec);
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_initGuidersButtonActionPerformed
+
+    private void setFilterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setFilterButtonActionPerformed
+        String filter = filterComboBox.getSelectedItem().toString();
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.setFilter(0, filter);
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_setFilterButtonActionPerformed
+
+    private void takeImagesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_takeImagesButtonActionPerformed
+        int nImages = ((Number) nImagesSpinner.getModel().getValue()).intValue();
+        float exposure = ((Number) exposureSpinner.getModel().getValue()).floatValue();
+        boolean openShutter = openShutterCheckBox.isSelected();
+        boolean science = scienceCheckBox.isSelected();
+        boolean wavefront = wavefrontCheckBox.isSelected();
+        boolean guider = guiderCheckBox.isSelected();
+        String visitName = visitNameTextField.getText();
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.takeImages(0, exposure, nImages, openShutter, science, wavefront, guider, visitName);
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_takeImagesButtonActionPerformed
+
+    private void initImageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initImageButtonActionPerformed
+        float deltaT = ((Number) deltaTSpinner.getModel().getValue()).floatValue();
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.initImage(0, deltaT);
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_initImageButtonActionPerformed
+
+    private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
+        int nClears = ((Number) nClearSpinner.getModel().getValue()).intValue();
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.clear(0, nClears);
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_clearButtonActionPerformed
+
+    private void startImageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startImageButtonActionPerformed
+        boolean openShutter = openShutterCheckBox1.isSelected();
+        boolean science = scienceCheckBox1.isSelected();
+        boolean wavefront = wavefrontCheckBox1.isSelected();
+        boolean guider = guiderCheckBox1.isSelected();
+        float timeout = ((Number) timeoutSpinner.getModel().getValue()).floatValue();
+        String visitName = visitNameTextField1.getText();
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.startImage(0, visitName, openShutter, science, wavefront, guider, timeout);
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_startImageButtonActionPerformed
+
+    private void endImageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endImageButtonActionPerformed
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.endImage(0);
+                return null;
+            }
+        };
+        sw.execute();
+    }//GEN-LAST:event_endImageButtonActionPerformed
+
+    private void discardRowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_discardRowsButtonActionPerformed
+        int nRows = ((Number) discardRowsSpinner.getModel().getValue()).intValue();
+        SwingWorker sw = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                ocs.discardRows(0, nRows);
+                return null;
+            }
+        };
+        sw.execute();    }//GEN-LAST:event_discardRowsButtonActionPerformed
+
     private class TextAreaHandler extends StreamHandler {
 
         @Override
@@ -597,28 +851,54 @@ public class ToyOCSGUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton clearButton;
     private javax.swing.JButton clearFaultButton;
+    private javax.swing.JPanel commandPanel1;
     private javax.swing.JPanel commandPanel2;
     private javax.swing.JSpinner deltaTSpinner;
     private javax.swing.JButton disableButton;
+    private javax.swing.JButton discardRowsButton;
+    private javax.swing.JSpinner discardRowsSpinner;
     private javax.swing.JButton enableButton;
+    private javax.swing.JButton endImageButton;
     private javax.swing.JButton enterControlButton;
     private javax.swing.JButton exitButton;
     private javax.swing.JSpinner exposureSpinner;
-    private javax.swing.JButton filterButton;
     private javax.swing.JComboBox filterComboBox;
+    private javax.swing.JCheckBox guiderCheckBox;
+    private javax.swing.JCheckBox guiderCheckBox1;
+    private javax.swing.JButton initGuidersButton;
     private javax.swing.JButton initImageButton;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextArea logTextArea;
+    private javax.swing.JSpinner nClearSpinner;
     private javax.swing.JSpinner nImagesSpinner;
-    private javax.swing.JCheckBox openShutterCheckbox;
+    private javax.swing.JCheckBox openShutterCheckBox;
+    private javax.swing.JCheckBox openShutterCheckBox1;
     private javax.swing.JButton revokeAvailableButton;
+    private javax.swing.JTextField roiSpecTextField;
+    private javax.swing.JCheckBox scienceCheckBox;
+    private javax.swing.JCheckBox scienceCheckBox1;
     private javax.swing.JButton setAvailableButton;
+    private javax.swing.JButton setFilterButton;
     private javax.swing.JButton simulateFault;
     private javax.swing.JButton standbyButton;
     private javax.swing.JButton startButton;
+    private javax.swing.JButton startImageButton;
     private javax.swing.JTextField startTextField;
     private javax.swing.JPanel statusPanel;
     private javax.swing.JButton takeImagesButton;
+    private javax.swing.JSpinner timeoutSpinner;
+    private javax.swing.JTextField visitNameTextField;
+    private javax.swing.JTextField visitNameTextField1;
+    private javax.swing.JCheckBox wavefrontCheckBox;
+    private javax.swing.JCheckBox wavefrontCheckBox1;
     // End of variables declaration//GEN-END:variables
 }

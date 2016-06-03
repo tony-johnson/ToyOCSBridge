@@ -54,6 +54,7 @@ public class OCSInterface {
 
     }
 
+    @SuppressWarnings("SleepWhileInLoop")
     void run() {
         try {
             runThread = Thread.currentThread();
@@ -84,7 +85,8 @@ public class OCSInterface {
                 }
                 cmdId = mgr.acceptCommand_takeImages(takeImagesCommand);
                 if (cmdId > 0) {
-                    bridge.takeImages(cmdId, takeImagesCommand.expTime, takeImagesCommand.numImages, takeImagesCommand.shutter);
+                    bridge.takeImages(cmdId, takeImagesCommand.expTime, takeImagesCommand.numImages, takeImagesCommand.shutter,
+                            takeImagesCommand.science, takeImagesCommand.wfs, takeImagesCommand.guide, takeImagesCommand.imageSequenceName);
                 }
                 cmdId = mgr.acceptCommand_initImage(initImageCommand);
                 if (cmdId > 0) {
