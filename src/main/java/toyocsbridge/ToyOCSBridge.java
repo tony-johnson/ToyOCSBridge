@@ -3,12 +3,13 @@ package toyocsbridge;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import toyocsbridge.OCSCommandExecutor.CCSCommand;
 import toyocsbridge.OCSCommandExecutor.OCSCommand;
 import toyocsbridge.OCSCommandExecutor.PreconditionsNotMet;
-import toyocsbridge.State.StateChangeListener;
+import toyocsbridge.Shutter.ShutterState;
 
 /**
  * This is a toy for experimenting with the OCS event behaviour. It is not real
@@ -35,20 +36,17 @@ public class ToyOCSBridge {
     private final Shutter shutter = new Shutter(ccs);
     private final Rafts rafts = new Rafts(ccs);
     private final Filter fcs = new Filter(ccs);
+    private ScheduledFuture<?> startImageTimeout;
 
     public ToyOCSBridge() {
         // We are ready to take an image only if the rafts have been cleared, and the shutter
         // has been prepared.
-        ccs.addStateChangeListener(new StateChangeListener() {
-
-            @Override
-            public void stateChanged(State state, Enum oldState) {
-                AggregateStatus as = ccs.getAggregateStatus();
-                if (as.hasState(Rafts.RaftsState.QUIESCENT, Shutter.ShutterReadinessState.READY)) {
-                    takeImageReadinessState.setState(TakeImageReadinessState.READY);
-                } else if (!as.hasState(TakeImageReadinessState.GETTING_READY)) {
-                    takeImageReadinessState.setState(TakeImageReadinessState.NOT_READY);
-                }
+        ccs.addStateChangeListener((state, oldState) -> {
+            AggregateStatus as = ccs.getAggregateStatus();
+            if (as.hasState(Rafts.RaftsState.QUIESCENT, Shutter.ShutterReadinessState.READY)) {
+                takeImageReadinessState.setState(TakeImageReadinessState.READY);
+            } else if (!as.hasState(TakeImageReadinessState.GETTING_READY)) {
+                takeImageReadinessState.setState(TakeImageReadinessState.NOT_READY);
             }
         });
     }
@@ -89,23 +87,28 @@ public class ToyOCSBridge {
     }
 
     void initGuiders(int cmdId, String roiSpec) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OCSCommand initGuiders = new InitGuiders(cmdId, roiSpec);
+        ocs.executeCommand(initGuiders);
     }
 
     void clear(int cmdId, int nClears) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OCSCommand clear = new Clear(cmdId, nClears);
+        ocs.executeCommand(clear);
     }
 
     void startImage(int cmdId, String visitName, boolean openShutter, boolean science, boolean wavefront, boolean guider, double timeout) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OCSCommand startImage = new StartImage(cmdId, visitName, openShutter, science, wavefront, guider, timeout);
+        ocs.executeCommand(startImage);
     }
 
     void endImage(int cmdId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OCSCommand endImage = new EndImage(cmdId);
+        ocs.executeCommand(endImage);
     }
 
     void discardRows(int cmdId, int nRows) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OCSCommand discardRows = new DiscardRows(cmdId, nRows);
+        ocs.executeCommand(discardRows);
     }
 
     void enterControl(int cmdId) {
@@ -183,6 +186,9 @@ public class ToyOCSBridge {
             if (deltaT <= 0 || deltaT > 15) {
                 throw new PreconditionsNotMet("Invalid deltaT: " + deltaT);
             }
+            if (startImageTimeout != null && !startImageTimeout.isDone()) {
+                throw new PreconditionsNotMet("Exposure in progress");
+            }
             return Duration.ZERO;
         }
 
@@ -191,7 +197,7 @@ public class ToyOCSBridge {
             Duration takeImagesExpected = Duration.ofMillis((long) (deltaT * 1000));
             takeImageReadinessState.setState(TakeImageReadinessState.GETTING_READY);
             ccs.schedule(takeImagesExpected.minus(Rafts.CLEAR_TIME), () -> {
-                rafts.clear();
+                rafts.clear(1);
             });
             ccs.schedule(takeImagesExpected.minus(Shutter.PREP_TIME), () -> {
                 shutter.prepare();
@@ -233,6 +239,9 @@ public class ToyOCSBridge {
             if (nImages <= 0 || nImages > 10 || exposure < 1 || exposure > 30) {
                 throw new PreconditionsNotMet("Invalid argument");
             }
+            if (startImageTimeout != null && !startImageTimeout.isDone()) {
+                throw new PreconditionsNotMet("Exposure in progress");
+            }
             // Worse case estimate
             return Duration.ofMillis((long) (exposure * 1000)).plus(Shutter.MOVE_TIME).plus(Rafts.READOUT_TIME).multipliedBy(nImages);
         }
@@ -242,8 +251,9 @@ public class ToyOCSBridge {
             Duration exposeTime = Duration.ofMillis((long) (exposure * 1000));
             for (int i = 0; i < nImages; i++) {
                 Future waitUntilReady = ccs.waitForStatus(TakeImageReadinessState.READY);
+                // FIXME: It is not necessarily necessary tp always do a clear _AND_ prepare
                 if (takeImageReadinessState.isInState(TakeImageReadinessState.NOT_READY)) {
-                    rafts.clear();
+                    rafts.clear(1);
                     shutter.prepare();
                 }
 
@@ -284,6 +294,9 @@ public class ToyOCSBridge {
             if (!lse209State.isInState(LSE209State.ENABLED)) {
                 throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
             }
+            if (startImageTimeout != null && !startImageTimeout.isDone()) {
+                throw new PreconditionsNotMet("Exposure in progress");
+            }
             if (!fcs.filterIsAvailable(filter)) {
                 throw new PreconditionsNotMet("Invalid filter: " + filter);
             }
@@ -299,6 +312,207 @@ public class ToyOCSBridge {
         @Override
         public String toString() {
             return "SetFilterCommand{" + "filter=" + filter + '}';
+        }
+
+    }
+
+    private class InitGuiders extends OCSCommand {
+
+        private final String roiSpec;
+
+        public InitGuiders(int cmdId, String roiSpec) {
+            super(cmdId);
+            this.roiSpec = roiSpec;
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
+            }
+            return Duration.ZERO;
+        }
+
+        @Override
+        void execute() {
+            // FIXME: Currently this does not actually do anything
+        }
+
+        @Override
+        public String toString() {
+            return "InitGuiders{" + "roiSpec=" + roiSpec + '}';
+        }
+
+    }
+
+    private class Clear extends OCSCommand {
+
+        private final int nClears;
+
+        public Clear(int cmdId, int nClears) {
+            super(cmdId);
+            this.nClears = nClears;
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
+            }
+            if (nClears <= 0 || nClears > 15) {
+                throw new PreconditionsNotMet("Invalid nClears: " + nClears);
+            }
+            return Rafts.CLEAR_TIME.multipliedBy(nClears);
+        }
+
+        @Override
+        void execute() throws InterruptedException, ExecutionException, TimeoutException {
+            rafts.clear(nClears);
+            // TODO: Note, unlike initImages, the clear command remains active until the clears are complete (Correct?)
+            Future waitUntilClear = ccs.waitForStatus(Rafts.RaftsState.QUIESCENT);
+            waitUntilClear.get(Rafts.CLEAR_TIME.multipliedBy(nClears).plus(Duration.ofSeconds(1)).toMillis(), TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public String toString() {
+            return "Clear{" + "nClears=" + nClears + '}';
+        }
+    }
+
+    private class StartImage extends OCSCommand {
+
+        private final String visitName;
+        private final boolean openShutter;
+        private final boolean science;
+        private final boolean wavefront;
+        private final boolean guider;
+        private final double timeout;
+
+        public StartImage(int cmdId, String visitName, boolean openShutter, boolean science, boolean wavefront, boolean guider, double timeout) {
+            super(cmdId);
+            this.visitName = visitName;
+            this.openShutter = openShutter;
+            this.science = science;
+            this.wavefront = wavefront;
+            this.guider = guider;
+            this.timeout = timeout;
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
+            }
+            if (timeout < 1 | timeout > 120) {
+                throw new PreconditionsNotMet("Invalid argument");
+            }
+            if (startImageTimeout != null && !startImageTimeout.isDone()) {
+                throw new PreconditionsNotMet("Exposure in progress");
+            }
+            return Duration.ofSeconds(1);
+        }
+
+        @Override
+        void execute() throws Exception {
+            Future waitUntilReady = ccs.waitForStatus(TakeImageReadinessState.READY);
+            // FIXME: It is not necessary to always clear and prepare the shutter, especially
+            // if we are not actually going to open the shutter.
+            if (takeImageReadinessState.isInState(TakeImageReadinessState.NOT_READY)) {
+                rafts.clear(1);
+                shutter.prepare();
+            }
+
+            waitUntilReady.get(1, TimeUnit.SECONDS);
+            if (openShutter) {
+                shutter.open();
+                rafts.startExposure();
+                // FIXME: Wait for shutter to open? right now we return immediately
+            } else {
+                rafts.startExposure();
+            }
+            startImageTimeout = ccs.schedule(Duration.ofMillis((long) (timeout * 1000)), () -> {
+                imageTimeout();
+            });
+        }
+
+        @Override
+        public String toString() {
+            return "StartImage{" + "visitName=" + visitName + ", openShutter=" + openShutter + ", science=" + science + ", wavefront=" + wavefront + ", guider=" + guider + ", timeout=" + timeout + '}';
+        }
+
+    }
+
+    /**
+     * Called if the timeout for a takeImages occurs
+     */
+    private void imageTimeout() {
+        // FIXME: Is this a NOOP if the shutter is already closed?
+        shutter.close();
+        rafts.endExposure(false);
+    }
+
+    private class EndImage extends OCSCommand {
+
+        public EndImage(int cmdId) {
+            super(cmdId);
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
+            }
+            if (startImageTimeout == null || startImageTimeout.isDone()) {
+                throw new PreconditionsNotMet("No exposure in progress");
+            }
+            return Shutter.MOVE_TIME;
+        }
+
+        @Override
+        void execute() throws Exception {
+            if (!startImageTimeout.cancel(false)) {
+                throw new RuntimeException("Image exposure already timed out");
+            }
+            Future waitUntilClosed = ccs.waitForStatus(ShutterState.CLOSED);
+            shutter.close();
+            waitUntilClosed.get(Shutter.MOVE_TIME.plus(Duration.ofSeconds(1)).toMillis(), TimeUnit.MILLISECONDS);
+            rafts.endExposure(true);
+        }
+
+        @Override
+        public String toString() {
+            return "EndImage{" + '}';
+        }
+    }
+
+    private class DiscardRows extends OCSCommand {
+
+        private final int nRows;
+
+        public DiscardRows(int cmdId, int nRows) {
+            super(cmdId);
+            this.nRows = nRows;
+        }
+
+        @Override
+        Duration testPreconditions() throws PreconditionsNotMet {
+            if (!lse209State.isInState(LSE209State.ENABLED)) {
+                throw new PreconditionsNotMet("Command not accepted in: " + lse209State);
+            }
+            if (startImageTimeout == null || startImageTimeout.isDone()) {
+                throw new PreconditionsNotMet("No exposure in progress");
+            }
+            return Duration.ZERO;
+        }
+
+        @Override
+        void execute() throws Exception {
+            // FIXME: Nothing actually happens, should at least generate some events.
+        }
+
+        @Override
+        public String toString() {
+            return "DiscardRows{" + "nRows=" + nRows + '}';
         }
 
     }
@@ -444,6 +658,11 @@ public class ToyOCSBridge {
         Duration testPreconditions() throws PreconditionsNotMet {
             if (!lse209State.isInState(LSE209State.ENABLED)) {
                 throw new PreconditionsNotMet("Command not accepted in " + lse209State);
+            }
+            // Fixme: Can we reject the disable command if we are busy?
+            // What about if we are not idle?
+            if (startImageTimeout != null || !startImageTimeout.isDone()) {
+                throw new PreconditionsNotMet("Exposure in progress");
             }
             return Duration.ZERO;
         }

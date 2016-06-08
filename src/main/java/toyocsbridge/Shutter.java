@@ -2,7 +2,6 @@ package toyocsbridge;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledFuture;
-import toyocsbridge.State.StateChangeListener;
 
 /**
  * Very simple shutter simulation
@@ -45,16 +44,12 @@ public class Shutter {
         shutterReadinessState = new State(ccs, ShutterReadinessState.NOT_READY);
         shutterState = new State(ccs, ShutterState.CLOSED);
         // When the shutter is closed, we only keep the motors powered up for a limited time
-        shutterState.addStateChangeListener(new StateChangeListener<ShutterState>() {
-            @Override
-            public void stateChanged(State<ShutterState> state, ShutterState oldState) {
-                if (state.isInState(ShutterState.CLOSED)) {
-                    scheduleNotReady();
-                } else {
-                    cancelNotReady();
-                }
+        shutterState.addStateChangeListener((state, oldState) -> {
+            if (state.isInState(ShutterState.CLOSED)) {
+                scheduleNotReady();
+            } else {
+                cancelNotReady();
             }
-
         });
     }
 
@@ -96,5 +91,24 @@ public class Shutter {
         ccs.schedule(time, () -> {
             shutterState.setState(ShutterState.CLOSED);
         });
+    }
+    
+    void open() {
+        shutterReadinessState.checkState(ShutterReadinessState.READY);
+        shutterState.checkState(ShutterState.CLOSED);
+        shutterState.setState(ShutterState.OPENING);
+        ccs.schedule(MOVE_TIME, () -> {
+            shutterState.setState(ShutterState.OPEN);
+        });
+    }
+    
+    void close() {
+        if (!shutterState.isInState(ShutterState.CLOSED)) {
+            shutterState.checkState(ShutterState.OPEN);
+            shutterState.setState(ShutterState.CLOSING);
+            ccs.schedule(MOVE_TIME, () -> {
+                shutterState.setState(ShutterState.CLOSED);
+            });        
+        }
     }
 }

@@ -67,12 +67,28 @@ public class Rafts {
         });
     }
 
-    void clear() {
+    void clear(int nClears) {
         raftsState.checkState(RaftsState.QUIESCENT, RaftsState.NEEDS_CLEAR);
         raftsState.setState(RaftsState.CLEARING);
-        ccs.schedule(CLEAR_TIME, () -> {
+        ccs.schedule(CLEAR_TIME.multipliedBy(nClears), () -> {
             raftsState.setState(RaftsState.QUIESCENT);
         });
     }
 
+    void startExposure() {
+        raftsState.checkState(RaftsState.QUIESCENT);
+        raftsState.setState(RaftsState.INTEGRATING);
+    }    
+
+    void endExposure(boolean readout) {
+        raftsState.checkState(RaftsState.INTEGRATING);
+        if (readout) {
+           raftsState.setState(RaftsState.READING_OUT); 
+           ccs.schedule(READOUT_TIME, () -> {
+            raftsState.setState(RaftsState.QUIESCENT);
+           });
+        } else {
+           raftsState.setState(RaftsState.NEEDS_CLEAR);
+        }
+    }
 }
