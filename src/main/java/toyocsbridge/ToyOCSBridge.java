@@ -661,7 +661,9 @@ public class ToyOCSBridge {
             }
             // Fixme: Can we reject the disable command if we are busy?
             // What about if we are not idle?
-            if (startImageTimeout != null || !startImageTimeout.isDone()) {
+            // Note logic here is incorrect according to Paul Lotz, we must always accept
+            // the disable command.
+            if (startImageTimeout != null && !startImageTimeout.isDone()) {
                 throw new PreconditionsNotMet("Exposure in progress");
             }
             return Duration.ZERO;
