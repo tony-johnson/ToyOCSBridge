@@ -130,14 +130,14 @@ public class ToyOCSGUI extends javax.swing.JFrame {
         enableButton = new javax.swing.JButton();
         disableButton = new javax.swing.JButton();
         startTextField = new javax.swing.JTextField();
-        commandPanel1 = new javax.swing.JPanel();
+        javax.swing.JPanel commandPanel1 = new javax.swing.JPanel();
         initImageButton = new javax.swing.JButton();
-        jLabel4 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
         deltaTSpinner = new javax.swing.JSpinner();
         takeImagesButton = new javax.swing.JButton();
-        jLabel5 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
         nImagesSpinner = new javax.swing.JSpinner();
-        jLabel6 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel6 = new javax.swing.JLabel();
         exposureSpinner = new javax.swing.JSpinner();
         openShutterCheckBox = new javax.swing.JCheckBox();
         setFilterButton = new javax.swing.JButton();
@@ -236,7 +236,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
             }
         });
 
-        exitButton.setText("exit");
+        exitButton.setText("exitControl");
         exitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitButtonActionPerformed(evt);
@@ -623,7 +623,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.exit(0);
+                ocs.exitControl(0);
                 return null;
             }
         };
@@ -853,7 +853,6 @@ public class ToyOCSGUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearButton;
     private javax.swing.JButton clearFaultButton;
-    private javax.swing.JPanel commandPanel1;
     private javax.swing.JPanel commandPanel2;
     private javax.swing.JSpinner deltaTSpinner;
     private javax.swing.JButton disableButton;
@@ -872,9 +871,6 @@ public class ToyOCSGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextArea logTextArea;

@@ -71,8 +71,8 @@ public class OCSInterface {
             camera.command_disable disableCommand = new camera.command_disable();
             mgr.salProcessor("camera_command_enterControl");
             camera.command_enterControl enterControlCommand = new camera.command_enterControl();
-            mgr.salProcessor("camera_command_exit");
-            camera.command_exit exitCommand = new camera.command_exit();
+            mgr.salProcessor("camera_command_exitControl");
+            camera.command_exitControl exitControlCommand = new camera.command_exitControl();
             mgr.salProcessor("camera_command_start");
             camera.command_start startCommand = new camera.command_start();
             mgr.salProcessor("camera_command_standby");
@@ -104,9 +104,9 @@ public class OCSInterface {
                 if (cmdId > 0) {
                     bridge.enterControl(cmdId);
                 }
-                cmdId = mgr.acceptCommand_exit(exitCommand);
+                cmdId = mgr.acceptCommand_exitControl(exitControlCommand);
                 if (cmdId > 0) {
-                    bridge.exit(cmdId);
+                    bridge.exitControl(cmdId);
                 }
                 cmdId = mgr.acceptCommand_start(startCommand);
                 if (cmdId > 0) {

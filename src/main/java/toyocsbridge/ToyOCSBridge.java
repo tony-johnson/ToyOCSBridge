@@ -116,7 +116,7 @@ public class ToyOCSBridge {
         ocs.executeCommand(takeControl);
     }
 
-    void exit(int cmdId) {
+    void exitControl(int cmdId) {
         OCSCommand exit = new ExitCommand(cmdId);
         ocs.executeCommand(exit);
     }
