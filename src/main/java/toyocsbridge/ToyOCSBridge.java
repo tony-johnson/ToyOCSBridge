@@ -206,7 +206,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "InitImageCommand{" + "deltaT=" + deltaT + '}';
+            return "InitImageCommand("+getCmdId()+"){" + "deltaT=" + deltaT + '}';
         }
     }
 
@@ -275,7 +275,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "TakeImagesCommand{" + "exposure=" + exposure + ", nImages=" + nImages + ", openShutter=" + openShutter + ", science=" + science + ", wavefront=" + wavefront + ", guider=" + guider + ", visitName=" + visitName + '}';
+            return "TakeImagesCommand("+getCmdId()+"){" + "exposure=" + exposure + ", nImages=" + nImages + ", openShutter=" + openShutter + ", science=" + science + ", wavefront=" + wavefront + ", guider=" + guider + ", visitName=" + visitName + '}';
         }
 
     }
@@ -311,7 +311,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "SetFilterCommand{" + "filter=" + filter + '}';
+            return "SetFilterCommand("+getCmdId()+"){" + "filter=" + filter + '}';
         }
 
     }
@@ -340,7 +340,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "InitGuiders{" + "roiSpec=" + roiSpec + '}';
+            return "InitGuiders("+getCmdId()+"){" + "roiSpec=" + roiSpec + '}';
         }
 
     }
@@ -375,7 +375,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "Clear{" + "nClears=" + nClears + '}';
+            return "Clear("+getCmdId()+"){" + "nClears=" + nClears + '}';
         }
     }
 
@@ -437,7 +437,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "StartImage{" + "visitName=" + visitName + ", openShutter=" + openShutter + ", science=" + science + ", wavefront=" + wavefront + ", guider=" + guider + ", timeout=" + timeout + '}';
+            return "StartImage("+getCmdId()+"){" + "visitName=" + visitName + ", openShutter=" + openShutter + ", science=" + science + ", wavefront=" + wavefront + ", guider=" + guider + ", timeout=" + timeout + '}';
         }
 
     }
@@ -481,7 +481,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "EndImage{" + '}';
+            return "EndImage("+getCmdId()+"){" + '}';
         }
     }
 
@@ -512,7 +512,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "DiscardRows{" + "nRows=" + nRows + '}';
+            return "DiscardRows("+getCmdId()+"){" + "nRows=" + nRows + '}';
         }
 
     }
@@ -538,7 +538,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "EnterControlCommand";
+            return "EnterControlCommand("+getCmdId()+")";
         }
     }
 
@@ -563,7 +563,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "ExitCommand";
+            return "ExitCommand("+getCmdId()+")";
         }
     }
 
@@ -592,7 +592,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "StartCommand{" + "configuration=" + configuration + '}';
+            return "StartCommand("+getCmdId()+"){" + "configuration=" + configuration + '}';
         }
     }
 
@@ -619,7 +619,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "StandbyCommand";
+            return "StandbyCommand("+getCmdId()+")";
         }
     }
 
@@ -644,7 +644,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "EnabledCommand";
+            return "EnabledCommand("+getCmdId()+")";
         }
     }
 
@@ -678,7 +678,7 @@ public class ToyOCSBridge {
 
         @Override
         public String toString() {
-            return "DisableCommand";
+            return "DisableCommand("+getCmdId()+")";
         }
     }
 

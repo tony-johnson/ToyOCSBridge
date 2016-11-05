@@ -61,7 +61,7 @@ public class OCSCommandExecutor {
     }
 
     protected void acknowledgeCommand(OCSCommand command, Duration timeout) {
-        logger.log(Level.INFO, "Acknowledge command: {0}", command);
+        logger.log(Level.INFO, "Acknowledge command: {0} timeout {1}", new Object[]{command, timeout});
     }
 
     protected void reportError(OCSCommand command, Exception ex) {
