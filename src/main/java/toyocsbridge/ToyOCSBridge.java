@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.lsst.sal.SAL_camera;
 import toyocsbridge.OCSCommandExecutor.CCSCommand;
 import toyocsbridge.OCSCommandExecutor.OCSCommand;
 import toyocsbridge.OCSCommandExecutor.PreconditionsNotMet;
@@ -205,8 +206,8 @@ public class ToyOCSBridge {
         }
 
         @Override
-        public String toString() {
-            return "InitImageCommand("+getCmdId()+"){" + "deltaT=" + deltaT + '}';
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_initImage(getCmdId(), response, timeout, message);
         }
     }
 
@@ -278,6 +279,11 @@ public class ToyOCSBridge {
             return "TakeImagesCommand("+getCmdId()+"){" + "exposure=" + exposure + ", nImages=" + nImages + ", openShutter=" + openShutter + ", science=" + science + ", wavefront=" + wavefront + ", guider=" + guider + ", visitName=" + visitName + '}';
         }
 
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_takeImages(getCmdId(), response, timeout, message);
+        }
+
     }
 
     class SetFilterCommand extends OCSCommand {
@@ -314,6 +320,11 @@ public class ToyOCSBridge {
             return "SetFilterCommand("+getCmdId()+"){" + "filter=" + filter + '}';
         }
 
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_setFilter(getCmdId(), response, timeout, message);
+        }
+
     }
 
     private class InitGuiders extends OCSCommand {
@@ -341,6 +352,11 @@ public class ToyOCSBridge {
         @Override
         public String toString() {
             return "InitGuiders("+getCmdId()+"){" + "roiSpec=" + roiSpec + '}';
+        }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_initGuiders(getCmdId(), response, timeout, message);
         }
 
     }
@@ -376,6 +392,11 @@ public class ToyOCSBridge {
         @Override
         public String toString() {
             return "Clear("+getCmdId()+"){" + "nClears=" + nClears + '}';
+        }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+//            mgr.ackCommand_clear(getCmdId(), response, timeout, message);
         }
     }
 
@@ -440,6 +461,11 @@ public class ToyOCSBridge {
             return "StartImage("+getCmdId()+"){" + "visitName=" + visitName + ", openShutter=" + openShutter + ", science=" + science + ", wavefront=" + wavefront + ", guider=" + guider + ", timeout=" + timeout + '}';
         }
 
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+//            mgr.ackCommand_startImage(getCmdId(), response, timeout, message);
+        }
+
     }
 
     /**
@@ -483,6 +509,11 @@ public class ToyOCSBridge {
         public String toString() {
             return "EndImage("+getCmdId()+"){" + '}';
         }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+//            mgr.ackCommand_endImage(getCmdId(), response, timeout, message);
+        }
     }
 
     private class DiscardRows extends OCSCommand {
@@ -515,6 +546,11 @@ public class ToyOCSBridge {
             return "DiscardRows("+getCmdId()+"){" + "nRows=" + nRows + '}';
         }
 
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+//            mgr.ackCommand_discardRows(getCmdId(), response, timeout, message);
+        }
+
     }
 
     class EnterControlCommand extends OCSCommand {
@@ -540,6 +576,11 @@ public class ToyOCSBridge {
         public String toString() {
             return "EnterControlCommand("+getCmdId()+")";
         }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_enterControl(getCmdId(), response, timeout, message);
+        }
     }
 
     class ExitCommand extends OCSCommand {
@@ -564,6 +605,11 @@ public class ToyOCSBridge {
         @Override
         public String toString() {
             return "ExitCommand("+getCmdId()+")";
+        }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_exitControl(getCmdId(), response, timeout, message);
         }
     }
 
@@ -594,6 +640,11 @@ public class ToyOCSBridge {
         public String toString() {
             return "StartCommand("+getCmdId()+"){" + "configuration=" + configuration + '}';
         }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_start(getCmdId(), response, timeout, message);
+        }
     }
 
     class StandbyCommand extends OCSCommand {
@@ -621,6 +672,11 @@ public class ToyOCSBridge {
         public String toString() {
             return "StandbyCommand("+getCmdId()+")";
         }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_standby(getCmdId(), response, timeout, message);
+        }
     }
 
     class EnableCommand extends OCSCommand {
@@ -645,6 +701,11 @@ public class ToyOCSBridge {
         @Override
         public String toString() {
             return "EnabledCommand("+getCmdId()+")";
+        }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_enable(getCmdId(), response, timeout, message);            
         }
     }
 
@@ -679,6 +740,11 @@ public class ToyOCSBridge {
         @Override
         public String toString() {
             return "DisableCommand("+getCmdId()+")";
+        }
+
+        @Override
+        void ackCommand(SAL_camera mgr, int response, int timeout, String message) {
+            mgr.ackCommand_disable(getCmdId(), response, timeout, message);
         }
     }
 
