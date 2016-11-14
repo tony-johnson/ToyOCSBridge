@@ -3,6 +3,7 @@ package toyocsbridge;
 import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.lsst.sal.SAL_camera;
 
 /**
  *
@@ -101,6 +102,8 @@ public class OCSCommandExecutor {
         public int getCmdId() {
             return cmdId;
         }
+
+        abstract void ackCommand(SAL_camera mgr, int response, int timeout, String message);
     }
 
     /**

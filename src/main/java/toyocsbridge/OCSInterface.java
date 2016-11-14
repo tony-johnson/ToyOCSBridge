@@ -143,7 +143,7 @@ public class OCSInterface {
         protected void reportComplete(OCSCommand command) {
             super.reportComplete(command);
             if (command.getCmdId() != 0 && runThread != null) {
-                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_COMPLETE, 0, "Done : OK");
+                command.ackCommand(mgr, SAL_camera.SAL__CMD_COMPLETE, 0, "Done : OK");
             }
 
         }
@@ -152,7 +152,7 @@ public class OCSInterface {
         protected void reportError(OCSCommand command, Exception ex) {
             super.reportError(command, ex);
             if (command.getCmdId() != 0 && runThread != null) {
-                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_FAILED, 0, "Error : " + ex.getMessage());
+                command.ackCommand(mgr, SAL_camera.SAL__CMD_FAILED, 0, "Error : " + ex.getMessage());
             }
         }
 
@@ -160,7 +160,7 @@ public class OCSInterface {
         protected void acknowledgeCommand(OCSCommand command, Duration timeout) {
             super.acknowledgeCommand(command, timeout);
             if (command.getCmdId() != 0 && runThread != null) {
-                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_INPROGRESS, (int) timeout.getSeconds(), "Ack : OK");
+                command.ackCommand(mgr, SAL_camera.SAL__CMD_INPROGRESS, (int) timeout.getSeconds(), "Ack : OK");
             }
         }
 
@@ -168,7 +168,7 @@ public class OCSInterface {
         protected void rejectCommand(OCSCommand command, String reason) {
             super.rejectCommand(command, reason);
             if (command.getCmdId() != 0 && runThread != null) {
-                mgr.ackCommand_takeImages(command.getCmdId(), SAL_camera.SAL__CMD_NOACK, 0, "Ack : NO");
+                command.ackCommand(mgr, SAL_camera.SAL__CMD_NOACK, 0, "Ack : NO");
             }
         }
     }
