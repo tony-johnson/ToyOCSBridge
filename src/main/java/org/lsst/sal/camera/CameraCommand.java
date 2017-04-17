@@ -1,5 +1,6 @@
 package org.lsst.sal.camera;
 
+import java.time.Duration;
 import org.lsst.sal.SAL_camera;
 
 /**
@@ -12,6 +13,7 @@ public abstract class CameraCommand extends SALCommand {
         super(cmdId);
     }
 
-    abstract void issueCommand(SAL_camera mgr);
-    
+    abstract CommandResponse issueCommand(SAL_camera mgr);    
+
+    abstract void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout);
 }

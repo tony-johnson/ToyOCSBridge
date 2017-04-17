@@ -1,5 +1,6 @@
 package org.lsst.sal.camera;
 
+import java.time.Duration;
 import org.lsst.sal.SAL_camera;
 
 /**
@@ -13,7 +14,12 @@ class StandbyCommand extends CameraCommand {
     }
 
     @Override
-    void issueCommand(SAL_camera mgr) {
+    CommandResponse issueCommand(SAL_camera mgr) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

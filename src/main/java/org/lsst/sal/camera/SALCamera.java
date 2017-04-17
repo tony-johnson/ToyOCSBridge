@@ -31,6 +31,6 @@ public abstract class SALCamera {
      */
     public abstract CameraCommand getNextCommand(Duration timeout) throws SALException;
 
-    public abstract void issueCommand(CameraCommand command) throws SALException;
+    public abstract CommandResponse issueCommand(CameraCommand command) throws SALException;
     
 }

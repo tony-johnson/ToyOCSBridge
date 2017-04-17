@@ -2,6 +2,7 @@ package org.lsst.sal.camera;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.Future;
 import org.lsst.sal.SAL_camera;
 
 /**
@@ -16,7 +17,8 @@ class SALCameraImplementation extends SALCamera {
 
     SALCameraImplementation() {
         mgr = new SAL_camera();
-        mgr.createP
+        //TODO: Some checks that connection was succesful, to prevent later
+        // unexpected errors
     }
 
     @Override
@@ -94,8 +96,8 @@ class SALCameraImplementation extends SALCamera {
     }
 
     @Override
-    public void issueCommand(CameraCommand command) throws SALException {
-        command.issueCommand(mgr);
+    public CommandResponse issueCommand(CameraCommand command) throws SALException {
+        return command.issueCommand(mgr);
     }
 
 }

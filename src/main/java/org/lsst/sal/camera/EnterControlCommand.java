@@ -1,5 +1,6 @@
 package org.lsst.sal.camera;
 
+import java.time.Duration;
 import org.lsst.sal.SAL_camera;
 
 /**
@@ -13,8 +14,14 @@ class EnterControlCommand extends CameraCommand {
     }
     
     @Override
-    void issueCommand(SAL_camera mgr) {
+    CommandResponse issueCommand(SAL_camera mgr) {
         camera.command_enterControl cmd = new camera.command_enterControl();
-        mgr.issueCommand_enterControl(cmd);
+        int cmdId = mgr.issueCommand_enterControl(cmd);
+        return new CommandResponse(mgr, this,cmdId);
     }    
+
+    @Override
+    void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
+        mgr.waitForCompletion_enterControl(cmdId, (int) timeout.getSeconds());
+    }
 }
