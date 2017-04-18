@@ -2,7 +2,6 @@ package org.lsst.sal.camera;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.concurrent.Future;
 import org.lsst.sal.SAL_camera;
 
 /**
@@ -46,44 +45,43 @@ class SALCameraImplementation extends SALCamera {
         mgr.salProcessor("camera_command_standby");
         camera.command_standby standbyCommand = new camera.command_standby();
 
-        Instant now = Instant.now();
-        while (!now.isAfter(stop)) {
+        while (!Instant.now().isAfter(stop)) {
             int cmdId = mgr.acceptCommand_setFilter(setFilterCommand);
             if (cmdId > 0) {
-                return new SetFilterCommand(cmdId, setFilterCommand.name);
+                return new SetFilterCommand(cmdId, mgr, setFilterCommand.name);
             }
             cmdId = mgr.acceptCommand_takeImages(takeImagesCommand);
             if (cmdId > 0) {
-                return new TakeImagesCommand(cmdId, takeImagesCommand.expTime, takeImagesCommand.numImages, takeImagesCommand.shutter,
+                return new TakeImagesCommand(cmdId, mgr, takeImagesCommand.expTime, takeImagesCommand.numImages, takeImagesCommand.shutter,
                         takeImagesCommand.science, takeImagesCommand.wfs, takeImagesCommand.guide, takeImagesCommand.imageSequenceName);
             }
             cmdId = mgr.acceptCommand_initImage(initImageCommand);
             if (cmdId > 0) {
-                return new InitImageCommand(cmdId, initImageCommand.deltaT);
+                return new InitImageCommand(cmdId, mgr, initImageCommand.deltaT);
             }
             cmdId = mgr.acceptCommand_enable(enableCommand);
             if (cmdId > 0) {
-                return new EnableCommand(cmdId);
+                return new EnableCommand(cmdId, mgr);
             }
             cmdId = mgr.acceptCommand_disable(disableCommand);
             if (cmdId > 0) {
-                return new DisableCommand(cmdId);
+                return new DisableCommand(cmdId, mgr);
             }
             cmdId = mgr.acceptCommand_enterControl(enterControlCommand);
             if (cmdId > 0) {
-                return new EnterControlCommand(cmdId);
+                return new EnterControlCommand(cmdId, mgr);
             }
             cmdId = mgr.acceptCommand_exitControl(exitControlCommand);
             if (cmdId > 0) {
-                return new ExitControlCommand(cmdId);
+                return new ExitControlCommand(cmdId, mgr);
             }
             cmdId = mgr.acceptCommand_start(startCommand);
             if (cmdId > 0) {
-                return new StartCommand(cmdId, startCommand.configuration);
+                return new StartCommand(cmdId, mgr, startCommand.configuration);
             }
             cmdId = mgr.acceptCommand_standby(standbyCommand);
             if (cmdId > 0) {
-                return new StandbyCommand(cmdId);
+                return new StandbyCommand(cmdId, mgr);
             }
             try {
                 // FIXME: Would be great if we did not have to poll
@@ -98,6 +96,35 @@ class SALCameraImplementation extends SALCamera {
     @Override
     public CommandResponse issueCommand(CameraCommand command) throws SALException {
         return command.issueCommand(mgr);
+    }
+
+    @Override
+    public void logEvent(CameraEvent event) throws SALException {
+        event.logEvent(mgr);
+    }
+
+    @Override
+    @SuppressWarnings("SleepWhileInLoop")
+    public CameraEvent getNextEvent(Duration timeout) throws SALException {
+        Instant stop = Instant.now().plus(timeout);
+
+        // Currently we have to poll for each event
+        mgr.salEvent("camera_logevent_SummaryState");
+        camera.logevent_SummaryState summaryStateEvent = new camera.logevent_SummaryState();
+
+        while (!Instant.now().isAfter(stop)) {
+            int rc = mgr.getEvent_SummaryState(summaryStateEvent);
+            if (rc  == SAL_camera.SAL__OK) {
+                return new SummaryStateEvent(summaryStateEvent.priority, summaryStateEvent.SummaryStateValue);
+            }
+            try {
+                // FIXME: Would be great if we did not have to poll
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                throw new SALException("Unexpected interupt while polling for event", ex);
+            }
+        }
+        return null; // Timeout        
     }
 
 }

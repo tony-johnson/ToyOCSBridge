@@ -7,10 +7,13 @@ import org.lsst.sal.SAL_camera;
  *
  * @author tonyj
  */
-class EnableCommand extends CameraCommand {
+public class EnableCommand extends CameraCommand {
+    
+    public EnableCommand() {
+    }
 
-    public EnableCommand(int cmdId) {
-        super(cmdId);
+    EnableCommand(int cmdId, SAL_camera mgr) {
+        super(cmdId, mgr);
     }
 
     @Override
@@ -21,7 +24,12 @@ class EnableCommand extends CameraCommand {
     }
 
     @Override
-    void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
+    public void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
         mgr.waitForCompletion_enable(cmdId, (int) timeout.getSeconds());
+    }
+
+    @Override
+    public void acknowledgeCommand(int response, int timeout, String message) {
+        getManager().ackCommand_enable(getCmdId(), response, timeout, message);
     }
 }

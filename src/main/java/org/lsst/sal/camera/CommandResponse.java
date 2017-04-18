@@ -19,7 +19,7 @@ public class CommandResponse {
         this.cmdId = cmdId;
     }
     
-    void waitForResponse(Duration timeout) {
+    public void waitForResponse(Duration timeout) {
         command.waitForResponse(mgr,cmdId,timeout);
     }
 }

@@ -9,8 +9,8 @@ import org.lsst.sal.SAL_camera;
  */
 class ExitControlCommand extends CameraCommand {
 
-    public ExitControlCommand(int cmdId) {
-        super(cmdId);
+    ExitControlCommand(int cmdId, SAL_camera mgr) {
+        super(cmdId, mgr);
     }
 
     @Override
@@ -21,8 +21,13 @@ class ExitControlCommand extends CameraCommand {
     }
 
     @Override
-    void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
+    public void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
         mgr.waitForCompletion_exitControl(cmdId, (int) timeout.getSeconds());
+    }
+
+    @Override
+    void acknowledgeCommand(int response, int timeout, String message) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

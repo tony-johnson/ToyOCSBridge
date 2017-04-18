@@ -4,13 +4,13 @@ import java.time.Duration;
 import org.lsst.sal.SAL_camera;
 
 /**
- *
+ * 
  * @author tonyj
  */
 class EnterControlCommand extends CameraCommand {
 
-    public EnterControlCommand(int cmdId) {
-        super(cmdId);
+    EnterControlCommand(int cmdId, SAL_camera mgr) {
+        super(cmdId, mgr);
     }
     
     @Override
@@ -21,7 +21,12 @@ class EnterControlCommand extends CameraCommand {
     }    
 
     @Override
-    void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
+    public void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
         mgr.waitForCompletion_enterControl(cmdId, (int) timeout.getSeconds());
+    }
+
+    @Override
+    void acknowledgeCommand(int response, int timeout, String message) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

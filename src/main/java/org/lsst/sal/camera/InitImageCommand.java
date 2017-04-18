@@ -9,8 +9,8 @@ import org.lsst.sal.SAL_camera;
  */
 class InitImageCommand extends CameraCommand {
 
-    public InitImageCommand(int cmdId, double deltaT) {
-        super(cmdId);
+    InitImageCommand(int cmdId, SAL_camera mgr, double deltaT) {
+        super(cmdId, mgr);
     }
 
     @Override
@@ -19,7 +19,12 @@ class InitImageCommand extends CameraCommand {
     }
 
     @Override
-    void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
+    public void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    void acknowledgeCommand(int response, int timeout, String message) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -9,8 +9,8 @@ import org.lsst.sal.SAL_camera;
  */
 class DisableCommand extends CameraCommand {
 
-    public DisableCommand(int cmdId) {
-        super(cmdId);
+    DisableCommand(int cmdId, SAL_camera mgr) {
+        super(cmdId, mgr);
     }
 
     @Override
@@ -21,7 +21,12 @@ class DisableCommand extends CameraCommand {
     }
 
     @Override
-    void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
+    public void waitForResponse(SAL_camera mgr, int cmdId, Duration timeout) {
         mgr.waitForCompletion_enable(cmdId, (int) timeout.getSeconds());
     }  
+
+    @Override
+    void acknowledgeCommand(int response, int timeout, String message) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
