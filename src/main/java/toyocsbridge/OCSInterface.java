@@ -3,6 +3,7 @@ package toyocsbridge;
 import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.lsst.sal.camera.CameraColdTelemetry;
 import org.lsst.sal.camera.CameraCommand;
 import org.lsst.sal.camera.DisableCommand;
 import org.lsst.sal.camera.EnableCommand;
@@ -75,6 +76,32 @@ public class OCSInterface {
         };
         t.start();
 
+        Thread t2 = new Thread("TelemetryGenerator") {
+            @Override
+            public void run() {
+                try {
+                    while (true) {
+
+                        Thread.sleep(10000);
+                        CameraColdTelemetry cold = new CameraColdTelemetry();
+                        fillRandom(cold.getCompressor_load());
+                        fillRandom(cold.getCompressor_speed());
+                        ocsInterface.mgr.sendTelemetry(cold);
+                        logger.log(Level.INFO, "Telemetry sent");
+                    }
+                } catch (InterruptedException | SALException ex) {
+                    logger.log(Level.SEVERE, "Error while sending telemetry", ex);
+                } 
+            }
+
+            private void fillRandom(float[] compressor_load) {
+                for (int i=0; i<compressor_load.length; i++) {
+                    
+                }
+            }
+
+        };
+        t2.start();
     }
 
     @SuppressWarnings("SleepWhileInLoop")
@@ -109,7 +136,7 @@ public class OCSInterface {
             }
             //mgr.salShutdown();
         } catch (SALException ex) {
-            logger.log(Level.SEVERE,"Unexpected error while waiting for commands",ex);
+            logger.log(Level.SEVERE, "Unexpected error while waiting for commands", ex);
         } finally {
             runThread = null;
         }
