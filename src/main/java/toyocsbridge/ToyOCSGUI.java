@@ -17,6 +17,16 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import org.lsst.sal.camera.DisableCommand;
+import org.lsst.sal.camera.EnableCommand;
+import org.lsst.sal.camera.EnterControlCommand;
+import org.lsst.sal.camera.ExitControlCommand;
+import org.lsst.sal.camera.InitGuidersCommand;
+import org.lsst.sal.camera.InitImageCommand;
+import org.lsst.sal.camera.SetFilterCommand;
+import org.lsst.sal.camera.StandbyCommand;
+import org.lsst.sal.camera.StartCommand;
+import org.lsst.sal.camera.TakeImagesCommand;
 
 /**
  *
@@ -611,7 +621,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.enterControl(0);
+                ocs.execute(new EnterControlCommand());
                 return null;
             }
         };
@@ -623,7 +633,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.exitControl(0);
+                ocs.execute(new ExitControlCommand());
                 return null;
             }
         };
@@ -636,7 +646,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.start(0, configuration);
+                ocs.execute(new StartCommand(configuration));
                 return null;
             }
         };
@@ -649,7 +659,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.standby(0);
+                ocs.execute(new StandbyCommand());
                 return null;
             }
         };
@@ -660,7 +670,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.enable(0);
+                ocs.execute(new EnableCommand());
                 return null;
             }
         };
@@ -672,7 +682,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.disable(0);
+                ocs.execute(new DisableCommand());
                 return null;
             }
         };
@@ -733,7 +743,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.initGuiders(0, roiSpec);
+                ocs.execute(new InitGuidersCommand(roiSpec));
                 return null;
             }
         };
@@ -746,7 +756,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.setFilter(0, filter);
+                ocs.execute(new SetFilterCommand(filter));
                 return null;
             }
         };
@@ -765,7 +775,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.takeImages(0, exposure, nImages, openShutter, science, wavefront, guider, visitName);
+                ocs.execute(new TakeImagesCommand(exposure, nImages, openShutter, science, wavefront, guider, visitName));
                 return null;
             }
         };
@@ -778,7 +788,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.initImage(0, deltaT);
+                ocs.execute(new InitImageCommand(deltaT));
                 return null;
             }
         };
@@ -791,7 +801,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.clear(0, nClears);
+                //ocs.clear(0, nClears);
                 return null;
             }
         };
@@ -809,7 +819,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.startImage(0, visitName, openShutter, science, wavefront, guider, timeout);
+                //ocs.startImage(0, visitName, openShutter, science, wavefront, guider, timeout);
                 return null;
             }
         };
@@ -821,7 +831,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.endImage(0);
+                //ocs.endImage(0);
                 return null;
             }
         };
@@ -834,7 +844,7 @@ public class ToyOCSGUI extends javax.swing.JFrame {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ocs.discardRows(0, nRows);
+                //ocs.discardRows(0, nRows);
                 return null;
             }
         };

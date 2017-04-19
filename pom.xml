@@ -13,9 +13,9 @@
     
     <dependencies>
         <dependency>
-            <groupId>org.lsst.lsst-tsvm</groupId>
-            <artifactId>sal_camera</artifactId>
-            <version>3.5.0</version>
+            <groupId>org.lsst</groupId>
+            <artifactId>SimpleSAL</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

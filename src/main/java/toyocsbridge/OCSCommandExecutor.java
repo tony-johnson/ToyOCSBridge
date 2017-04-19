@@ -3,7 +3,7 @@ package toyocsbridge;
 import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.lsst.sal.SAL_camera;
+import org.lsst.sal.camera.CameraCommand;
 
 /**
  *
@@ -23,7 +23,7 @@ public class OCSCommandExecutor {
         commandState = new State(ccs, CommandState.IDLE);
     }
 
-    void executeCommand(OCSCommand command) {
+    void executeCommand(OCSExecutor command) {
         if (!commandState.isInState(CommandState.IDLE)) {
             rejectCommand(command, "Command state not idle");
         } else {
@@ -57,33 +57,33 @@ public class OCSCommandExecutor {
         }
     }
 
-    protected void rejectCommand(OCSCommand command, String reason) {
+    protected void rejectCommand(OCSExecutor command, String reason) {
         logger.log(Level.INFO, "Reject command: {0} because {1}", new Object[]{command, reason});
     }
 
-    protected void acknowledgeCommand(OCSCommand command, Duration timeout) {
+    protected void acknowledgeCommand(OCSExecutor command, Duration timeout) {
         logger.log(Level.INFO, "Acknowledge command: {0} timeout {1}", new Object[]{command, timeout});
     }
 
-    protected void reportError(OCSCommand command, Exception ex) {
+    protected void reportError(OCSExecutor command, Exception ex) {
         logger.log(Level.WARNING, "Command failed: " + command, ex);
     }
 
-    protected void reportComplete(OCSCommand command) {
+    protected void reportComplete(OCSExecutor command) {
         logger.log(Level.INFO, "Command complete: {0}", command);
     }
 
     /**
-     * A base class for all OCS commands
+     * A base class for all OCS command executors
      *
      * @author tonyj
      */
-    public static abstract class OCSCommand {
+    public static abstract class OCSExecutor {
 
-        private final int cmdId;
+        private final CameraCommand cmd;
 
-        OCSCommand(int cmdId) {
-            this.cmdId = cmdId;
+        OCSExecutor(CameraCommand command) {
+            this.cmd = command;
         }
 
         /**
@@ -100,10 +100,18 @@ public class OCSCommandExecutor {
         abstract void execute() throws Exception;
 
         public int getCmdId() {
-            return cmdId;
+            return cmd.getCmdId();
+        }
+        
+        public CameraCommand getCommand() {
+            return cmd;
         }
 
-        abstract void ackCommand(SAL_camera mgr, int response, int timeout, String message);
+        @Override
+        public String toString() {
+            return cmd.toString();
+        }
+
     }
 
     /**

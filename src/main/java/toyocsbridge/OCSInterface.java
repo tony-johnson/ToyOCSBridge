@@ -3,8 +3,21 @@ package toyocsbridge;
 import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.lsst.sal.SAL_camera;
-import toyocsbridge.ToyOCSBridge.LSE209State;
+import org.lsst.sal.camera.CameraCommand;
+import org.lsst.sal.camera.DisableCommand;
+import org.lsst.sal.camera.EnableCommand;
+import org.lsst.sal.camera.EnterControlCommand;
+import org.lsst.sal.camera.ExitControlCommand;
+import org.lsst.sal.camera.GenericEvent;
+import org.lsst.sal.camera.SALCamera;
+import org.lsst.sal.camera.SALException;
+import org.lsst.sal.camera.SetFilterCommand;
+import org.lsst.sal.camera.SummaryStateEvent;
+import org.lsst.sal.camera.SummaryStateEvent.LSE209State;
+import org.lsst.sal.camera.TakeImagesCommand;
+import org.lsst.sal.camera.InitImageCommand;
+import org.lsst.sal.camera.StandbyCommand;
+import org.lsst.sal.camera.StartCommand;
 
 /**
  * Interface to the real OCS.
@@ -13,7 +26,7 @@ import toyocsbridge.ToyOCSBridge.LSE209State;
  */
 public class OCSInterface {
 
-    private final SAL_camera mgr;
+    private final SALCamera mgr;
     private boolean shutdown = false;
     private Thread runThread;
     private final ToyOCSBridge bridge;
@@ -21,24 +34,22 @@ public class OCSInterface {
 
     OCSInterface(ToyOCSBridge bridge) {
         this.bridge = bridge;
-        mgr = new SAL_camera();
-        
-        // Create events 
-        mgr.salEvent("camera_logevent_SummaryState");
-        camera.logevent_SummaryState summaryStateEvent  = new camera.logevent_SummaryState(); 
-        
+        mgr = SALCamera.instance();
+
         ExtendedOCSCommandExecutor exec = new ExtendedOCSCommandExecutor(bridge.getCCS());
         bridge.setExecutor(exec);
         bridge.getCCS().addStateChangeListener((currentState, oldState) -> {
             String msg = String.format("State Changed %s: %s->%s", currentState.getClass().getSimpleName(), oldState, currentState);
             int priority = 1;
-            if (currentState.getState() instanceof LSE209State) {
-                // FIXME: This cannot be right
-                summaryStateEvent.SummaryStateValue = currentState.getState().ordinal();
-                int status = mgr.logEvent_SummaryState(summaryStateEvent, priority);
-            } else {
-                // For now send a generic event
-                mgr.logEvent(msg, priority);   
+            try {
+                if (currentState.getState() instanceof LSE209State) {
+                    mgr.logEvent(new SummaryStateEvent(priority, (LSE209State) currentState.getState()));
+                } else {
+                    // For now send a generic event
+                    mgr.logEvent(new GenericEvent(priority, msg));
+                }
+            } catch (SALException x) {
+                logger.log(Level.SEVERE, "Unable to log message", x);
             }
         });
     }
@@ -71,70 +82,34 @@ public class OCSInterface {
         try {
             runThread = Thread.currentThread();
             // Currently we have to poll for each command
-            mgr.salProcessor("camera_command_setFilter");
-            camera.command_setFilter setFilterCommand = new camera.command_setFilter();
-            mgr.salProcessor("camera_command_takeImages");
-            camera.command_takeImages takeImagesCommand = new camera.command_takeImages();
-            mgr.salProcessor("camera_command_initImage");
-            camera.command_initImage initImageCommand = new camera.command_initImage();
-            mgr.salProcessor("camera_command_enable");
-            camera.command_enable enableCommand = new camera.command_enable();
-            mgr.salProcessor("camera_command_disable");
-            camera.command_disable disableCommand = new camera.command_disable();
-            mgr.salProcessor("camera_command_enterControl");
-            camera.command_enterControl enterControlCommand = new camera.command_enterControl();
-            mgr.salProcessor("camera_command_exitControl");
-            camera.command_exitControl exitControlCommand = new camera.command_exitControl();
-            mgr.salProcessor("camera_command_start");
-            camera.command_start startCommand = new camera.command_start();
-            mgr.salProcessor("camera_command_standby");
-            camera.command_standby standbyCommand = new camera.command_standby();
 
             while (!shutdown) {
-                int cmdId = mgr.acceptCommand_setFilter(setFilterCommand);
-                if (cmdId > 0) {
-                    bridge.setFilter(cmdId, setFilterCommand.name);
-                }
-                cmdId = mgr.acceptCommand_takeImages(takeImagesCommand);
-                if (cmdId > 0) {
-                    bridge.takeImages(cmdId, takeImagesCommand.expTime, takeImagesCommand.numImages, takeImagesCommand.shutter,
-                            takeImagesCommand.science, takeImagesCommand.wfs, takeImagesCommand.guide, takeImagesCommand.imageSequenceName);
-                }
-                cmdId = mgr.acceptCommand_initImage(initImageCommand);
-                if (cmdId > 0) {
-                    bridge.initImage(cmdId, initImageCommand.deltaT);
-                }
-                cmdId = mgr.acceptCommand_enable(enableCommand);
-                if (cmdId > 0) {
-                    bridge.enable(cmdId);
-                }
-                cmdId = mgr.acceptCommand_disable(disableCommand);
-                if (cmdId > 0) {
-                    bridge.disable(cmdId);
-                }
-                cmdId = mgr.acceptCommand_enterControl(enterControlCommand);
-                if (cmdId > 0) {
-                    bridge.enterControl(cmdId);
-                }
-                cmdId = mgr.acceptCommand_exitControl(exitControlCommand);
-                if (cmdId > 0) {
-                    bridge.exitControl(cmdId);
-                }
-                cmdId = mgr.acceptCommand_start(startCommand);
-                if (cmdId > 0) {
-                    bridge.start(cmdId, startCommand.configuration);
-                }
-                cmdId = mgr.acceptCommand_standby(standbyCommand);
-                if (cmdId > 0) {
-                    bridge.standby(cmdId);
-                }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    logger.log(Level.SEVERE, "Unexpected interruption", ex);
+                CameraCommand cmd = mgr.getNextCommand(Duration.ofMinutes(1));
+                if (cmd == null) {
+                    logger.info("Still waiting for a command");
+                } else if (cmd instanceof SetFilterCommand) {
+                    bridge.execute((SetFilterCommand) cmd);
+                } else if (cmd instanceof TakeImagesCommand) {
+                    bridge.execute((TakeImagesCommand) cmd);
+                } else if (cmd instanceof InitImageCommand) {
+                    bridge.execute((InitImageCommand) cmd);
+                } else if (cmd instanceof EnableCommand) {
+                    bridge.execute((EnableCommand) cmd);
+                } else if (cmd instanceof DisableCommand) {
+                    bridge.execute((DisableCommand) cmd);
+                } else if (cmd instanceof ExitControlCommand) {
+                    bridge.execute((ExitControlCommand) cmd);
+                } else if (cmd instanceof EnterControlCommand) {
+                    bridge.execute((EnterControlCommand) cmd);
+                } else if (cmd instanceof StartCommand) {
+                    bridge.execute((StartCommand) cmd);
+                } else if (cmd instanceof StandbyCommand) {
+                    bridge.execute((StandbyCommand) cmd);
                 }
             }
-            mgr.salShutdown();
+            //mgr.salShutdown();
+        } catch (SALException ex) {
+            logger.log(Level.SEVERE,"Unexpected error while waiting for commands",ex);
         } finally {
             runThread = null;
         }
@@ -152,36 +127,27 @@ public class OCSInterface {
         }
 
         @Override
-        protected void reportComplete(OCSCommand command) {
+        protected void reportComplete(OCSExecutor command) {
             super.reportComplete(command);
-            if (command.getCmdId() != 0 && runThread != null) {
-                command.ackCommand(mgr, SAL_camera.SAL__CMD_COMPLETE, 0, "Done : OK");
-            }
-
+            command.getCommand().reportComplete();
         }
 
         @Override
-        protected void reportError(OCSCommand command, Exception ex) {
+        protected void reportError(OCSExecutor command, Exception ex) {
             super.reportError(command, ex);
-            if (command.getCmdId() != 0 && runThread != null) {
-                command.ackCommand(mgr, SAL_camera.SAL__CMD_FAILED, 0, "Error : " + ex.getMessage());
-            }
+            command.getCommand().reportError(ex);
         }
 
         @Override
-        protected void acknowledgeCommand(OCSCommand command, Duration timeout) {
+        protected void acknowledgeCommand(OCSExecutor command, Duration timeout) {
             super.acknowledgeCommand(command, timeout);
-            if (command.getCmdId() != 0 && runThread != null) {
-                command.ackCommand(mgr, SAL_camera.SAL__CMD_INPROGRESS, (int) timeout.getSeconds(), "Ack : OK");
-            }
+            command.getCommand().acknowledgeCommand(timeout);
         }
 
         @Override
-        protected void rejectCommand(OCSCommand command, String reason) {
+        protected void rejectCommand(OCSExecutor command, String reason) {
             super.rejectCommand(command, reason);
-            if (command.getCmdId() != 0 && runThread != null) {
-                command.ackCommand(mgr, SAL_camera.SAL__CMD_NOACK, 0, "Ack : NO");
-            }
+            command.getCommand().rejectCommand(reason);
         }
     }
 }
